@@ -1,0 +1,37 @@
+/* Custom CSS to support arbitrary Tailwind classes used in the React app.
+   The default Tailwind CDN build (v2) does not include arbitrary color
+   utilities like `from-[#bf24c6]` or `bg-[#241bc6]`. To ensure the
+   application retains its intended colour palette without relying on the
+   Play CDN or a JIT compiler, we define the necessary classes here. */
+
+/* Gradient start colour: magenta (#bf24c6) */
+.from-\[\#bf24c6\] {
+  --tw-gradient-from: #bf24c6;
+  --tw-gradient-to: rgba(191, 36, 198, 0);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+/* Gradient end colour: indigo (#241bc6) */
+.to-\[\#241bc6\] {
+  --tw-gradient-to: #241bc6;
+}
+
+/* Solid background colours */
+.bg-\[\#241bc6\] { background-color: #241bc6; }
+.bg-\[\#bf24c6\] { background-color: #bf24c6; }
+.bg-\[\#d435d1\] { background-color: #d435d1; }
+.bg-\[\#3a32d1\] { background-color: #3a32d1; }
+
+/* Hover background colours */
+.hover\:bg-\[\#3a32d1\]:hover { background-color: #3a32d1; }
+.hover\:bg-\[\#d435d1\]:hover { background-color: #d435d1; }
+
+/* Text colours */
+.text-\[\#241bc6\] { color: #241bc6; }
+.text-\[\#bf24c6\] { color: #bf24c6; }
+.text-\[\#d435d1\] { color: #d435d1; }
+.text-\[\#3a32d1\] { color: #3a32d1; }
+
+/* Semi-transparent border colours */
+.border-\[\#241bc6\]\/50 { border-color: rgba(36, 27, 198, 0.5); }
+.border-\[\#bf24c6\]\/50 { border-color: rgba(191, 36, 198, 0.5); }
