@@ -1,0 +1,11 @@
+# Node dependency directory – these files will be installed by Vercel during
+# deployment and should not be checked into version control.
+node_modules/
+
+# Build output created by react-scripts (create-react-app) when running
+# `npm run build`.  Vercel uses this directory as the publish output.
+build/
+
+# Miscellaneous environment files and editor settings.
+.env
+.DS_Store
