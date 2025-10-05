@@ -1,12 +1,3 @@
-// This file contains the entire React application for the
-// Kütüphane ve Teknoloji Festivali Stüdyosu.  It mirrors the
-// implementation provided by the user, broken down into a handful
-// of components for camera capture, prompt controls, result display
-// and UI feedback such as toasts and modals.  Iconography is
-// supplied via the lucide-react package and Tailwind utility
-// classes are used for layout and styling.  The Tailwind CSS
-// stylesheet is loaded from the CDN in public/index.html.
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Zap, Upload, AlertTriangle, Download, Share2, BookOpen, BrainCircuit, Sparkles, Copy, RefreshCw } from 'lucide-react';
 
@@ -206,7 +197,7 @@ const CameraView = ({ onCapture, imageSrc }) => {
 
     const handleRetake = () => {
         setCameraError(null);
-        onCapture(null); // Clear the current image
+        onCapture(null, false); // Clear the current image, do not trigger scroll
     };
 
     return (
@@ -281,7 +272,7 @@ const PromptControls = React.forwardRef(({ onGenerate, imageSrc }, ref) => {
         "Alice Harikalar Diyarında gibi meraklı",
         "Dune evreninden bir Fremen",
         "Steampunk bir mucit",
-        "Bir elf gibi asil ve bilge",
+        "Bir elf gibi asil dan bilge",
         "Raskolnikov gibi çatışmalı",
         "Küçük Prens gibi düşünceli",
     ];
@@ -491,6 +482,7 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
         const gap = 15;
         return rectHeight + gap;
     };
+
     
     useEffect(() => {
          if (generatedImage && !isLoading && canvasRef.current) { 
@@ -502,8 +494,14 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
                 canvas.width = img.width; 
                 canvas.height = img.height; 
                 ctx.drawImage(img, 0, 0); 
+                
+                let line1Text = `Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim.`;
+                if (userPrompt) {
+                    line1Text += ` Hem de ${userPrompt} olarak!`;
+                }
+
                 const overlayTexts = { 
-                    line1: `Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Hem de ${userPrompt} olarak!`, 
+                    line1: line1Text,
                     line2: "Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz." 
                 }; 
                 const bottomMargin = canvas.height * 0.05; 
@@ -640,13 +638,13 @@ export default function App() {
         return () => window.removeEventListener('resize', checkIsMobile);
     }, []);
 
-    const handleCapture = (dataUrl) => {
+    const handleCapture = (dataUrl, shouldScroll = true) => {
         setImageSrc(dataUrl);
         setGeneratedImage(null);
         setError(null);
         setStory("");
 
-        if (isMobile && dataUrl && promptInputRef.current) {
+        if (isMobile && dataUrl && shouldScroll && promptInputRef.current) {
              const promptSection = document.getElementById('characterInputSection');
             if (promptSection) {
                 setLiveRegionText("Fotoğraf alındı. Lütfen favori roman karakterinizi girin.");
@@ -682,7 +680,17 @@ export default function App() {
         setGeneratedImage(null);
         setStory("");
 
-        const apiKey = "";
+        // DİKKAT: API anahtarınızı buraya doğrudan yazmayın.
+        // Bu anahtarı Vercel'deki Ortam Değişkenlerinden (Environment Variables) almalısınız.
+        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+        
+        if (!apiKey) {
+             console.error("API anahtarı bulunamadı. Lütfen ortam değişkenlerini kontrol edin.");
+             setError("Uygulama düzgün yapılandırılmamış. API anahtarı eksik.");
+             setIsLoading(false);
+             return;
+        }
+
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
         const base64ImageData = imageSrc.split(',')[1];
 
@@ -719,10 +727,17 @@ export default function App() {
         setStory("");
         setError(null);
 
-        const apiKey = "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        // DİKKAT: API anahtarınızı buraya doğrudan yazmayın.
+        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
         
-        const base64ImageData = generatedImage.split(',')[1]; // Use the generated image for story
+        if (!apiKey) {
+             console.error("API anahtarı bulunamadı. Lütfen ortam değişkenlerini kontrol edin.");
+             setError("Uygulama düzgün yapılandırılmamış. API anahtarı eksik.");
+             setIsGeneratingStory(false);
+             return;
+        }
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         
         const festivalInfo = `
         3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir.
@@ -736,7 +751,6 @@ export default function App() {
             contents: [{
                 parts: [
                     { text: storyPrompt }
-                    // Not including the image for the text-only model to avoid potential issues
                 ]
             }]
         };
