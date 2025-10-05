@@ -61,8 +61,8 @@ const translations = {
         livePhotoTaken: "Photo taken. Please enter your favorite novel character.",
         liveGeneratingImage: "Generating image…",
         liveImageGenerated: "Your image has been successfully created.",
-        shareText: (prompt) => `I'm at the 3rd International Library and Technology Festival${prompt ? `, as ${prompt}!` : '.'} You can create your own AI image at www.kutuphaneveteknoloji.com. #ktf #kutuphaneveteknolojifestivalindeyim`,
-        shareTextWithStory: (prompt, story) => `I'm at the 3rd International Library and Technology Festival, as the character ${prompt}. You can also create your own AI image and story at www.kutuphaneveteknoloji.com. Here is my story:\n\n${story}\n\n#ktf #kutuphaneveteknolojifestivalindeyim`,
+        shareText: (prompt) => `I'm at the 3rd International Library and Technology Festival${prompt ? `, as ${prompt}!` : '.'} You can create your own AI image at www.kutuphaneveteknoloji.com. #ltf #AtTheLibraryAndTechFestival`,
+        shareTextWithStory: (prompt, story) => `I'm at the 3rd International Library and Technology Festival, as the character ${prompt}. You can also create your own AI image and story at www.kutuphaneveteknoloji.com. Here is my story:\n\n${story}\n\n#ltf #AtTheLibraryAndTechFestival`,
         imageOverlayLine1: (prompt) => `I'm also at the 3rd International Library and Technology Festival${prompt ? ` as ${prompt}!` : '.'}`,
         imageOverlayLine2: "You can create your own AI image by visiting www.kutuphaneveteknoloji.com.",
         allPrompts: [
