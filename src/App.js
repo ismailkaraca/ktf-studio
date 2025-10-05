@@ -620,7 +620,19 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
                             <Share2 size={20} /> Sosyal Medyada Paylaş
                         </button>
                     </div>
-                    <button onClick={onGenerateStory} disabled={isGeneratingStory} className="mt-2 flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-wait transform hover:scale-105">
+
+                    <div className="w-full flex flex-col sm:flex-row gap-2 justify-center max-w-md px-4 sm:px-0">
+                        <button onClick={handleCopyToClipboard} className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-all text-sm flex-1">
+                            <Copy size={16} /> Paylaşım Metnini Kopyala
+                        </button>
+                        {story && (
+                            <button onClick={handleCopyStoryShareText} className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-all text-sm flex-1">
+                                <Copy size={16} /> Metni Hikaye İle Kopyala
+                            </button>
+                        )}
+                    </div>
+                    
+                    <button onClick={onGenerateStory} disabled={isGeneratingStory} className="flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-wait transform hover:scale-105">
                         <Sparkles size={20} className="text-yellow-300" /> 
                         {isGeneratingStory ? 'Hikaye Yazılıyor...' : '✨ Bu Karaktere Bir Hikaye Yaz'}
                     </button>
