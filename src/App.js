@@ -661,6 +661,22 @@ export default function App() {
         }
     };
 
+    const handleApiError = (err, context) => {
+        console.error(`${context} hatası:`, err);
+        let userMessage = `Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.`;
+        if (typeof err.message === 'string') {
+            if (err.message.includes("Quota exceeded")) {
+                userMessage = "API kullanım kotası aşıldı. Lütfen Google AI projenizin faturalandırma durumunu kontrol edin veya daha sonra tekrar deneyin.";
+            } else if (err.message.includes("SAFETY")) {
+                userMessage = "Üzgünüz, yapay zeka güvenlik politikaları nedeniyle bu içerik oluşturulamadı. Lütfen farklı bir tema deneyin.";
+            } else if (err.message.includes("API key not valid")) {
+                userMessage = "API anahtarı geçersiz. Lütfen uygulamanın yapılandırmasını kontrol edin.";
+            }
+        }
+        setError(userMessage);
+        setLiveRegionText(`Bir hata oluştu: ${userMessage}`);
+    };
+
     const handleGenerateImage = async (mode, prompt) => {
         if (!imageSrc) { setError("Lütfen önce bir fotoğraf çekin."); return; }
         
@@ -680,13 +696,11 @@ export default function App() {
         setGeneratedImage(null);
         setStory("");
 
-        // DİKKAT: API anahtarınızı buraya doğrudan yazmayın.
-        // Bu anahtarı Vercel'deki Ortam Değişkenlerinden (Environment Variables) almalısınız.
         const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
         
         if (!apiKey) {
-             console.error("API anahtarı bulunamadı. Lütfen ortam değişkenlerini kontrol edin.");
-             setError("Uygulama düzgün yapılandırılmamış. API anahtarı eksik.");
+             const err = new Error("API key not valid");
+             handleApiError(err, "Yapılandırma");
              setIsLoading(false);
              return;
         }
@@ -700,18 +714,27 @@ export default function App() {
 
         try {
             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(`Görsel oluşturulamadı. Hata: ${errorData.error?.message || response.statusText}`); }
+            if (!response.ok) { 
+                const errorData = await response.json(); 
+                const errorMessage = errorData.error?.message || response.statusText;
+                throw new Error(errorMessage);
+            }
             const result = await response.json();
             const candidate = result?.candidates?.[0];
             const problematicFinishReasons = ['NO_IMAGE', 'SAFETY', 'IMAGE_OTHER', 'RECITATION'];
-            if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) { const reason = candidate?.finishReason; const message = candidate?.finishMessage; console.error("API üretimi durdurdu. Sebep:", reason, "Mesaj:", message, result); let userMessage = "Yapay zeka bu görseli oluşturamadı. Lütfen farklı bir tema veya daha net bir fotoğraf deneyin."; if (reason === 'SAFETY' || reason === 'IMAGE_OTHER') { userMessage = "Üzgünüz, yapay zeka insan içeren gerçekçi görseller oluşturma konusunda kısıtlamalara sahip. Bu nedenle isteğiniz işlenemedi. Lütfen daha sanatsal bir tema deneyin."; } throw new Error(userMessage); }
+            if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) {
+                const reason = candidate?.finishReason || "unknown";
+                throw new Error(`API üretimi durdurdu. Sebep: ${reason}`);
+            }
             const base64Data = candidate?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-            if (base64Data) { setGeneratedImage(`data:image/png;base64,${base64Data}`); setLiveRegionText("Görseliniz başarıyla oluşturuldu."); } 
-            else { console.error("Yanıt formatı beklenmedik:", result); throw new Error("Yapay zekadan geçerli bir görsel alınamadı."); }
+            if (base64Data) { 
+                setGeneratedImage(`data:image/png;base64,${base64Data}`); 
+                setLiveRegionText("Görseliniz başarıyla oluşturuldu."); 
+            } else { 
+                throw new Error("Yapay zekadan geçerli bir görsel alınamadı."); 
+            }
         } catch (err) {
-            console.error(err);
-            setError(err.message);
-            setLiveRegionText(`Bir hata oluştu: ${err.message}`);
+            handleApiError(err, "Görsel oluşturma");
         } finally {
             setIsLoading(false);
         }
@@ -727,12 +750,11 @@ export default function App() {
         setStory("");
         setError(null);
 
-        // DİKKAT: API anahtarınızı buraya doğrudan yazmayın.
         const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
         
         if (!apiKey) {
-             console.error("API anahtarı bulunamadı. Lütfen ortam değişkenlerini kontrol edin.");
-             setError("Uygulama düzgün yapılandırılmamış. API anahtarı eksik.");
+             const err = new Error("API key not valid");
+             handleApiError(err, "Yapılandırma");
              setIsGeneratingStory(false);
              return;
         }
@@ -764,8 +786,8 @@ export default function App() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error("Hikaye oluşturma API hatası:", errorData);
-                throw new Error('Hikaye oluşturulamadı.');
+                const errorMessage = errorData.error?.message || response.statusText;
+                throw new Error(errorMessage);
             }
 
             const result = await response.json();
@@ -777,8 +799,7 @@ export default function App() {
                 throw new Error("API'den geçerli bir hikaye alınamadı.");
             }
         } catch (err) {
-            console.error(err);
-            setError("Üzgünüz, bu karaktere özel bir hikaye yazılamadı. Lütfen tekrar deneyin.");
+            handleApiError(err, "Hikaye oluşturma");
         } finally {
             setIsGeneratingStory(false);
         }
