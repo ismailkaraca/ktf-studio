@@ -427,7 +427,7 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
         }
     }, [error]);
 
-    const shareText = "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest";
+    const shareText = "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifestivalindeyim";
 
     const drawTextAndBackground = (ctx, text, yPos, canvas, options = {}) => {
         const { width } = canvas;
@@ -554,7 +554,7 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
     };
 
     const handleCopyStoryShareText = () => {
-        const shareTextWithStory = `Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim, hem de ${userPrompt} karakteriyle. Siz de festival kapsamında kendi yapay zeka görselinizi ve hikayenizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. Benim hikayem şöyle:\n\n${story}\n\n#ktf #kutuphaneveteknolojifest`;
+        const shareTextWithStory = `Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim, hem de ${userPrompt} karakteriyle. Siz de festival kapsamında kendi yapay zeka görselinizi ve hikayenizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. Benim hikayem şöyle:\n\n${story}\n\n#ktf #kutuphaneveteknolojifestivalindeyim`;
         if(copyToClipboard(shareTextWithStory)) {
             setShowShareModal(false);
         }
