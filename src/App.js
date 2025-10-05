@@ -427,7 +427,7 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
         }
     }, [error]);
 
-    const shareText = "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifestivalindeyim";
+    const shareText = `Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim${userPrompt ? `, hem de ${userPrompt} olarak!` : '.'} Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifestivalindeyim`;
 
     const drawTextAndBackground = (ctx, text, yPos, canvas, options = {}) => {
         const { width } = canvas;
@@ -627,7 +627,7 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
                         </button>
                         {story && (
                             <button onClick={handleCopyStoryShareText} className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-all text-sm flex-1">
-                                <Copy size={16} /> Metni Hikaye İle Kopyala
+                                <Copy size={16} /> Paylaşım Metnini  Hikaye İle Kopyala
                             </button>
                         )}
                     </div>
