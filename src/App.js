@@ -514,7 +514,41 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
         }
     }, [generatedImage, isLoading, userPrompt]);
     
-    const handleShare = () => { if (!canvasRef.current) return; setShowShareModal(true); };
+    const handleShare = async () => {
+        if (!canvasRef.current) return;
+
+        const canvas = canvasRef.current;
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                console.error("Canvas to Blob conversion failed.");
+                setToast({ message: 'Görsel paylaşılamadı.', type: 'error' });
+                return;
+            }
+
+            const file = new File([blob], 'ktf-studyosu-gorsel.png', { type: 'image/png' });
+            const shareData = {
+                title: 'Kütüphane ve Teknoloji Festivali Stüdyosu',
+                text: shareText,
+                files: [file],
+            };
+
+            // Check if Web Share API is supported and can share files
+            if (navigator.canShare && navigator.canShare(shareData)) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    console.error('Paylaşım hatası:', err);
+                    // Fallback to modal if user cancels or there's an error
+                    if (err.name !== 'AbortError') {
+                       setShowShareModal(true);
+                    }
+                }
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                setShowShareModal(true);
+            }
+        }, 'image/png');
+    };
     
     const copyToClipboard = (textToCopy) => {
         const textArea = document.createElement("textarea");
@@ -542,9 +576,7 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
     };
     
     const handleCopyToClipboard = () => {
-        if (copyToClipboard(shareText)) {
-            setShowShareModal(false);
-        }
+        copyToClipboard(shareText);
     };
     
     const handleCopyStory = () => {
@@ -555,9 +587,7 @@ const ImageOutput = ({ generatedImage, isLoading, error, mode, userPrompt, onGen
 
     const handleCopyStoryShareText = () => {
         const shareTextWithStory = `Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim, hem de ${userPrompt} karakteriyle. Siz de festival kapsamında kendi yapay zeka görselinizi ve hikayenizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. Benim hikayem şöyle:\n\n${story}\n\n#ktf #kutuphaneveteknolojifestivalindeyim`;
-        if(copyToClipboard(shareTextWithStory)) {
-            setShowShareModal(false);
-        }
+        copyToClipboard(shareTextWithStory);
     };
 
     const downloadImage = () => { if (canvasRef.current) { const link = document.createElement('a'); link.href = canvasRef.current.toDataURL('image/png'); link.download = 'ktf-studyosu-gorsel.png'; document.body.appendChild(link); link.click(); document.body.removeChild(link); } };
@@ -696,6 +726,10 @@ export default function App() {
         setGeneratedImage(null);
         setStory("");
 
+        // DİKKAT: API anahtarınızı buraya güvenli bir şekilde eklemelisiniz.
+        // Bu örnekte, bir ortam değişkeninden alınmaktadır.
+        // Gerçek bir uygulamada, bu anahtarı istemci tarafında tutmak GÜVENLİ DEĞİLDİR.
+        // Genellikle bir arka uç sunucusu üzerinden istek yapılır.
         const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
         
         if (!apiKey) {
