@@ -767,6 +767,25 @@ const ImageOutput = ({ generatedImage, isLoading, error, userPrompt, onGenerateS
 
 // --- Ana Uygulama ---
 
+// Data URI'ı Blob'a dönüştürmek için yardımcı fonksiyon
+function dataURItoBlob(dataURI) {
+    // base64 verisini string olarak tutulan ham ikili verilere dönüştür
+    const byteString = atob(dataURI.split(',')[1]);
+
+    // mime bileşenini ayır
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    // string'in baytlarını bir ArrayBuffer'a yaz
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ab], { type: mimeString });
+}
+
+
 export default function App() {
     const [language, setLanguage] = useState('tr');
     const [t, setT] = useState(translations.tr);
@@ -826,18 +845,6 @@ export default function App() {
         }
     };
 
-    const handleApiError = (err, context) => {
-        console.error(`${context} error:`, err);
-        let userMessage = t.errorGeneric;
-        if (typeof err.message === 'string') {
-            if (err.message.includes("Quota exceeded")) userMessage = t.errorQuota;
-            else if (err.message.includes("SAFETY")) userMessage = t.errorSafety;
-            else if (err.message.includes("API key not valid")) userMessage = t.errorApiKey;
-        }
-        setError(userMessage);
-        setLiveRegionText(`Error: ${userMessage}`);
-    };
-
     const handleGenerateImage = async (mode, prompt) => {
         if (!imageSrc) { setError(t.errorNeedPhoto); return; }
         
@@ -856,7 +863,9 @@ export default function App() {
         setGeneratedImage(null);
         setStory("");
 
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+        // OpenRouter API Anahtarını Vercel Environment Variables'tan alır.
+        // Vercel'de `REACT_APP_OPENROUTER_API_KEY` olarak tanımlanmalıdır.
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
         
         if (!apiKey) {
              handleApiError(new Error("API key not valid"), "Configuration");
@@ -864,30 +873,41 @@ export default function App() {
              return;
         }
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
-        const base64ImageData = imageSrc.split(',')[1];
-
-        const fullPrompt = t.apiImagePrompt(prompt);
-
-        const payload = { contents: [{ parts: [ { text: fullPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } } ] }], generationConfig: { responseModalities: ['IMAGE'] }, };
+        const apiUrl = `https://openrouter.ai/api/v1/images/edits`;
+        
+        const imageBlob = dataURItoBlob(imageSrc);
+        const formData = new FormData();
+        formData.append('image', imageBlob, 'input.jpg');
+        // OpenRouter'da image-to-image destekleyen bir model seçin.
+        // Örnek: 'stabilityai/stable-diffusion-xl-base-1.0'
+        // Bu modelin OpenRouter projeniz için etkinleştirildiğinden emin olun.
+        formData.append('model', 'stabilityai/stable-diffusion-xl-base-1.0');
+        formData.append('prompt', t.apiImagePrompt(prompt));
+        formData.append('response_format', 'b64_json');
 
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const response = await fetch(apiUrl, { 
+                method: 'POST', 
+                headers: { 
+                    'Authorization': `Bearer ${apiKey}`,
+                    // FormData kullandığımızda Content-Type tarayıcı tarafından otomatik eklenir.
+                }, 
+                body: formData 
+            });
+
             if (!response.ok) { 
                 const errorData = await response.json(); 
                 throw new Error(errorData.error?.message || response.statusText);
             }
             const result = await response.json();
-            const candidate = result?.candidates?.[0];
-            const problematicFinishReasons = ['NO_IMAGE', 'SAFETY', 'IMAGE_OTHER', 'RECITATION'];
-            if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) {
-                throw new Error(t.errorApiStop(candidate?.finishReason || "unknown"));
-            }
-            const base64Data = candidate?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+            
+            const base64Data = result?.data?.[0]?.b64_json;
+
             if (base64Data) { 
                 setGeneratedImage(`data:image/png;base64,${base64Data}`); 
                 setLiveRegionText(t.liveImageGenerated); 
             } else { 
+                console.error("OpenRouter response:", result);
                 throw new Error(t.errorNoImage); 
             }
         } catch (err) {
@@ -907,7 +927,9 @@ export default function App() {
         setStory("");
         setError(null);
 
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+        // OpenRouter API Anahtarını Vercel Environment Variables'tan alır.
+        // Vercel'de `REACT_APP_OPENROUTER_API_KEY` olarak tanımlanmalıdır.
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
         
         if (!apiKey) {
              handleApiError(new Error("API key not valid"), "Configuration");
@@ -915,25 +937,37 @@ export default function App() {
              return;
         }
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
         
         const festivalInfo = `The 3rd International Library and Technology Festival will be held between March 30 - April 5, 2026, at the Rami Library in Istanbul with the main theme of "Producing Libraries." The festival brings together technology and AI-based service producers, entrepreneurs, academics, and thousands of young people. The concept of a "producing library" aims to transform libraries into dynamic production centers that support the social, cultural, and technological development of individuals.`;
 
         const storyPrompt = t.apiStoryPrompt(userPrompt, festivalInfo);
 
-        const payload = { contents: [{ parts: [{ text: storyPrompt }] }] };
+        const payload = { 
+            model: "google/gemini-flash-1.5", // OpenRouter'da bulunan hızlı bir model
+            messages: [{ role: "user", content: storyPrompt }] 
+        };
 
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const response = await fetch(apiUrl, { 
+                method: 'POST', 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                }, 
+                body: JSON.stringify(payload) 
+            });
+            
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error?.message || response.statusText);
             }
             const result = await response.json();
-            const storyText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            const storyText = result.choices?.[0]?.message?.content;
             if (storyText) {
                 setStory(storyText);
             } else {
+                console.error("OpenRouter response:", result);
                 throw new Error(t.errorNoStory);
             }
         } catch (err) {
