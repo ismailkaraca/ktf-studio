@@ -460,7 +460,7 @@ export default function App() {
     
     // --- OPENROUTER ENTEGRASYONU İÇİN EKLENEN KISIM ---
     const OPENROUTER_API_KEY = "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";
-    const YOUR_SITE_URL = "https://www.kutuphaneveteknoloji.com"; 
+    const YOUR_SITE_URL = "https://ktf-studio.vercel.app"; 
     const YOUR_APP_NAME = "KTF Stüdyo";
     
     const promptInputRef = useRef(null);
