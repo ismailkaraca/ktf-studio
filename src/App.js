@@ -55,10 +55,10 @@ const translations = {
     copyShareText: "Copy Share Text",
     copyShareTextWithStory: "Copy Share Text with Story",
     close: "Close",
-    shareText: "I'm at the 3rd International Library and Technology Festival, as \"{prompt}\". Visit www.kutuphaneveteknoloji.com to create your own AI image for the festival. #ktf #kutuphaneveteknolojifest",
-    shareTextWithStory: "I'm also at the festival to be held at Rami Library between March 30 – April 5, 2026. And as \"{prompt}\". Visit www.kutuphaneveteknoloji.com to create your own AI image and story for the festival. #ktf #kutuphaneveteknolojifest\n\nHere is my story:\n{story}",
+    shareText: "I'm at the 3rd International Library and Technology Festival, as \"{prompt}\". Visit ktf-studio.vercel.app to create your own AI image for the festival. #ktf #kutuphaneveteknolojifest",
+    shareTextWithStory: "I'm also at the festival to be held at Rami Library between March 30 – April 5, 2026. And as \"{prompt}\". Visit ktf-studio.vercel.app to create your own AI image and story for the festival. #ktf #kutuphaneveteknolojifest\n\nHere is my story:\n{story}",
     canvasLine1: "I'm at the 3rd Int'l Library & Technology Festival, as {prompt}!",
-    canvasLine2: "Create your own AI image for the festival at www.kutuphaneveteknoloji.com",
+    canvasLine2: "Create your own AI image for the festival at ktf-studio.vercel.app",
     imagePrompt: `Create an artistic portrait inspired by the person in this photo. The theme of the portrait should be "{prompt}". The background should combine library and technology elements. The style should be like a non-photorealistic digital art piece.`,
     storyPrompt: `You are a creative storyteller. Using the festival information I will provide, write a short (max 3 paragraphs), captivating story in English about the character from the generated image, based on the user's original prompt: '{prompt}'. The story should take place at the 3rd International Library and Technology Festival. The story must be consistent with the festival's main theme of "Producing Libraries", the atmosphere of the image, and the character's mood. Here's what you need to know about the festival: {festivalInfo}`,
     samplePrompts: ["Mysterious and clever like Sherlock Holmes", "A dystopian character from the novel 1984", "Captain Ahab from Moby Dick", "Adventurous like Don Quixote", "A Ghibli film character", "Romantic like Jane Eyre", "A Cyberpunk character", "Curious like Alice in Wonderland", "A Fremen from the Dune universe", "A Steampunk inventor", "Noble and wise like an elf", "Conflicted like Raskolnikov", "Thoughtful like The Little Prince"],
@@ -115,10 +115,10 @@ const translations = {
     copyShareText: "Paylaşım Metnini Kopyala",
     copyShareTextWithStory: "Paylaşım Metnini Hikaye İle Kopyala",
     close: "Kapat",
-    shareText: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim, hem de \"{prompt}\". Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest",
-    shareTextWithStory: "Ben de 30 Mart – 5 Nisan 2026 tarihlerinde Rami Kütüphanesi'nde gerçekleştirilecek festivaldeyim. Hem de \"{prompt}\" olarak. Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest\n\nİşte benim hikayem:\n{story}",
+    shareText: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim, hem de \"{prompt}\". Festival kapsamında kendi yapay zeka görselinizi oluşturmak için ktf-studio.vercel.app adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest",
+    shareTextWithStory: "Ben de 30 Mart – 5 Nisan 2026 tarihlerinde Rami Kütüphanesi'nde gerçekleştirilecek festivaldeyim. Hem de \"{prompt}\" olarak. Festival kapsamında kendi yapay zeka görselinizi oluşturmak için ktf-studio.vercel.app adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest\n\nİşte benim hikayem:\n{story}",
     canvasLine1: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Hem de {prompt} olarak!",
-    canvasLine2: "Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz.",
+    canvasLine2: "Kendi görselinizi oluşturmak için ktf-studio.vercel.app adresini ziyaret edin.",
     imagePrompt: `Bu fotoğraftaki kişiden ilham alarak sanatsal bir portre oluştur. Portrenin teması "{prompt}" olmalı. Arka plan, kütüphane ve teknoloji öğelerini birleştirmeli. Stil, fotogerçekçi olmayan bir dijital sanat eseri gibi olmalı.`,
     storyPrompt: `Yaratıcı bir hikaye anlatıcısısın. Sana vereceğim festival bilgilerini kullanarak, kullanıcının orijinal istemi olan '{prompt}' ve bu istemle oluşturulan görseldeki karakterden yola çıkarak, bu karakterin 3. Uluslararası Kütüphane ve Teknoloji Festivali'nde geçen kısa (en fazla 3 paragraflık), büyüleyici ve Türkçe bir hikayesini yaz. Hikaye, festivalin "Üreten Kütüphaneler" ana temasıyla, görseldeki atmosferle ve karakterin ruh haliyle uyumlu olsun. İşte festivalle ilgili bilmen gerekenler: {festivalInfo}`,
     samplePrompts: ["Sherlock Holmes gibi gizemli ve zeki", "1984 romanından distopik bir karakter", "Moby Dick'ten Kaptan Ahab", "Don Kişot gibi maceraperest", "Bir Ghibli film karakteri", "Jane Eyre gibi romantik", "Cyberpunk bir karakter", "Alice Harikalar Diyarında gibi meraklı", "Dune evreninden bir Fremen", "Steampunk bir mucit", "Bir elf gibi asil ve bilge", "Raskolnikov gibi çatışmalı", "Küçük Prens gibi düşünceli"],
@@ -273,7 +273,7 @@ const PromptControls = React.forwardRef(({ onGenerate, imageSrc, t, language }, 
 const Toast = ({ message, type, onClose }) => { useEffect(() => { const timer = setTimeout(() => { onClose(); }, 3000); return () => clearTimeout(timer); }, [onClose]); const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600'; return (<div className={`fixed bottom-5 right-5 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50`}>{message}</div>); };
 
 const ShareModal = ({ shareText, onClose, onCopy, story, onCopyStoryShare, t }) => {
-    const pageUrl = "https://www.kutuphaneveteknoloji.com/";
+    const pageUrl = "https://ktf-studio.vercel.app/";
     const socialLinks = [ { name: "X", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}` }, { name: "Facebook", url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent(shareText)}` }, { name: "LinkedIn", url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}` }, { name: "WhatsApp", url: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + pageUrl)}` }, { name: "Telegram", url: `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(shareText)}` }, ];
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-40" onClick={onClose}>
@@ -460,7 +460,12 @@ export default function App() {
     
     // --- GÜNCELLENEN KISIM ---
     const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
-    const YOUR_SITE_URL = "https://ktf-studio.vercel.app"; // URL güncellendi
+    const [siteUrl, setSiteUrl] = useState('');
+    useEffect(() => {
+      // Bu useEffect, bileşen yüklendiğinde çalışır ve window nesnesine erişim sağlar.
+      // Böylece site adresi dinamik olarak alınır.
+      setSiteUrl(window.location.origin);
+    }, []);
     const YOUR_APP_NAME = "KTF Stüdyo";
     
     const promptInputRef = useRef(null);
@@ -472,7 +477,7 @@ export default function App() {
     const toggleLanguage = () => { setLanguage(prevLang => prevLang === 'tr' ? 'en' : 'tr'); };
 
     const handleGenerateStory = useCallback(async (promptForStory) => {
-        if (!promptForStory) return;
+        if (!promptForStory || !siteUrl) return;
 
         const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
         const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zekâ temelli hizmetler üretenleri, girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
@@ -489,7 +494,7 @@ export default function App() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': YOUR_SITE_URL,
+                    'HTTP-Referer': siteUrl,
                     'X-Title': YOUR_APP_NAME,
                 },
                 body: JSON.stringify(payload)
@@ -516,7 +521,7 @@ export default function App() {
             setLiveRegionText(`${t('errorPrefix')}${err.message}`);
             throw err; 
         }
-    }, [t, YOUR_APP_NAME, YOUR_SITE_URL, OPENROUTER_API_KEY]);
+    }, [t, YOUR_APP_NAME, siteUrl, OPENROUTER_API_KEY]);
 
     const onGenerateStory = async () => {
         if (!generatedImage || !userPrompt) {
@@ -558,7 +563,7 @@ export default function App() {
     };
     
     const handleGenerateImage = async (mode, prompt) => {
-        if (!imageSrc) { setError(t('photoTip')); return; }
+        if (!imageSrc || !siteUrl) { setError(t('photoTip')); return; }
         
         const resultSection = document.getElementById('resultSection');
         if (resultSection) { resultSection.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' }); }
@@ -598,7 +603,7 @@ export default function App() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': YOUR_SITE_URL,
+                    'HTTP-Referer': siteUrl,
                     'X-Title': YOUR_APP_NAME,
                 },
                 body: JSON.stringify(payload)
