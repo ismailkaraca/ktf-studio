@@ -95,7 +95,7 @@ const translations = {
     copyImageShareText: "Paylaşım Metnini Kopyala",
     copyStoryShareText: "Hikaye Metnini Kopyala",
     loadingImage: "Yapay zeka portrenizi tasarlıyor...",
-    loadingImageMessages: ["Renkler ve dokular ayarlanıyor...","Sanatsal fırça darbeleri ekleniyor...","Son sihirli dokunuşlar yapılıyor...","Yapay zeka ilham perilerini çağırıyor..."],
+    loadingImageMessages: ["Renkler ve dokular ayarlanıyor...","Sanatsal fırça darbeleri ekleniyor...","Son sihirli dokuşlar yapılıyor...","Yapay zeka ilham perilerini çağırıyor..."],
     loadingStory: "Lütfen bekleyin... Karakterinize hikaye yazılıyor...",
     autoStoryLoadingMessages: ["Karakterinizin festivale katılsa neler hissedebileceğini merak ediyor musunuz?", "Edebi bir evren yaratılıyor...", "Son satırlar kaleme alınıyor..."],
     errorPrefix: "Bir hata oluştu: ",
@@ -121,7 +121,7 @@ const translations = {
     canvasLine2: "Kendi görselinizi oluşturmak için ktf-studio.vercel.app adresini ziyaret edin.",
     imagePrompt: `Bu fotoğraftaki kişiden ilham alarak sanatsal bir portre oluştur. Portrenin teması "{prompt}" olmalı. Arka plan, kütüphane ve teknoloji öğelerini birleştirmeli. Stil, fotogerçekçi olmayan bir dijital sanat eseri gibi olmalı.`,
     storyPrompt: `Yaratıcı bir hikaye anlatıcısısın. Sana vereceğim festival bilgilerini kullanarak, kullanıcının orijinal istemi olan '{prompt}' ve bu istemle oluşturulan görseldeki karakterden yola çıkarak, bu karakterin 3. Uluslararası Kütüphane ve Teknoloji Festivali'nde geçen kısa (en fazla 3 paragraflık), büyüleyici ve Türkçe bir hikayesini yaz. Hikaye, festivalin "Üreten Kütüphaneler" ana temasıyla, görseldeki atmosferle ve karakterin ruh haliyle uyumlu olsun. İşte festivalle ilgili bilmen gerekenler: {festivalInfo}`,
-    samplePrompts: ["Sherlock Holmes gibi gizemli ve zeki", "1984 romanından distopik bir karakter", "Moby Dick'ten Kaptan Ahab", "Don Kişot gibi maceraperest", "Bir Ghibli film karakteri", "Jane Eyre gibi romantik", "Cyberpunk bir karakter", "Alice Harikalar Diyarında gibi meraklı", "Dune evreninden bir Fremen", "Steampunk bir mucit", "Bir elf gibi asil ve bilge", "Raskolnikov gibi çatışmalı", "Küçük Prens gibi düşünceli"],
+    samplePrompts: ["Sherlock Holmes gibi gizemli ve zeki", "1984 romanından distropik bir karakter", "Moby Dick'ten Kaptan Ahab", "Don Kişot gibi maceraperest", "Bir Ghibli film karakteri", "Jane Eyre gibi romantik", "Cyberpunk bir karakter", "Alice Harikalar Diyarında gibi meraklı", "Dune evreninden bir Fremen", "Steampunk bir mucit", "Bir elf gibi asil ve bilge", "Raskolnikov gibi çatışmalı", "Küçük Prens gibi düşünceli"],
   }
 };
 
@@ -458,12 +458,9 @@ export default function App() {
     const [language, setLanguage] = useState('tr');
     const [generationStep, setGenerationStep] = useState(null);
     
-    // --- GÜNCELLENEN KISIM ---
     const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
     const [siteUrl, setSiteUrl] = useState('');
     useEffect(() => {
-      // Bu useEffect, bileşen yüklendiğinde çalışır ve window nesnesine erişim sağlar.
-      // Böylece site adresi dinamik olarak alınır.
       setSiteUrl(window.location.origin);
     }, []);
     const YOUR_APP_NAME = "KTF Stüdyo";
@@ -502,8 +499,9 @@ export default function App() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error("Hikaye oluşturma OpenRouter API hatası:", errorData);
-                throw new Error(t('storyGenerationError'));
+                // HATA AYIKLAMA İÇİN DETAYLI LOGLAMA
+                console.error("Hikaye oluşturma OpenRouter API hatası:", JSON.stringify(errorData, null, 2));
+                throw new Error(errorData.error?.message || t('storyGenerationError'));
             }
             
             const result = await response.json();
@@ -611,19 +609,22 @@ export default function App() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error("OpenRouter API Hatası:", errorData);
+                // HATA AYIKLAMA İÇİN DETAYLI LOGLAMA
+                console.error("Görsel oluşturma OpenRouter API Hatası:", JSON.stringify(errorData, null, 2));
                 throw new Error(errorData.error?.message || t('imageGenerationError'));
             }
 
             const result = await response.json();
-            const base64Data = result.choices?.[0]?.message?.content;
+            const content = result.choices?.[0]?.message?.content;
 
-            if (base64Data) {
-                const newImageSrc = `data:image/png;base64,${base64Data}`;
+            // --- GÜNCELLENEN GÖRSEL YANITI İŞLEME ---
+            if (typeof content === 'string') {
+                // Yanıtın tam bir data URI mi yoksa sadece base64 mü olduğunu kontrol et
+                const newImageSrc = content.startsWith('data:image/') ? content : `data:image/png;base64,${content}`;
                 setGeneratedImage(newImageSrc);
                 setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
-                console.error("OpenRouter'dan beklenmedik yanıt formatı:", result);
+                console.error("OpenRouter'dan beklenmedik yanıt formatı (görsel):", result);
                 throw new Error(t('invalidResponseError'));
             }
         } catch (err) {
