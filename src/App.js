@@ -458,9 +458,9 @@ export default function App() {
     const [language, setLanguage] = useState('tr');
     const [generationStep, setGenerationStep] = useState(null);
     
-    // --- OPENROUTER ENTEGRASYONU İÇİN GÜNCELLENEN KISIM ---
+    // --- GÜNCELLENEN KISIM ---
     const OPENROUTER_API_KEY = process.env.REACT_APP_OPENROUTER_API_KEY;
-    const YOUR_SITE_URL = "https://www.kutuphaneveteknoloji.com"; 
+    const YOUR_SITE_URL = "https://ktf-studio.vercel.app"; // URL güncellendi
     const YOUR_APP_NAME = "KTF Stüdyo";
     
     const promptInputRef = useRef(null);
@@ -471,7 +471,6 @@ export default function App() {
 
     const toggleLanguage = () => { setLanguage(prevLang => prevLang === 'tr' ? 'en' : 'tr'); };
 
-    // --- OPENROUTER İÇİN GÜNCELLENDİ ---
     const handleGenerateStory = useCallback(async (promptForStory) => {
         if (!promptForStory) return;
 
@@ -517,7 +516,7 @@ export default function App() {
             setLiveRegionText(`${t('errorPrefix')}${err.message}`);
             throw err; 
         }
-    }, [t, YOUR_APP_NAME, YOUR_SITE_URL, OPENROUTER_API_KEY]); // Bağımlılıklar güncellendi
+    }, [t, YOUR_APP_NAME, YOUR_SITE_URL, OPENROUTER_API_KEY]);
 
     const onGenerateStory = async () => {
         if (!generatedImage || !userPrompt) {
@@ -558,7 +557,6 @@ export default function App() {
         }
     };
     
-    // --- OPENROUTER İÇİN GÜNCELLENDİ ---
     const handleGenerateImage = async (mode, prompt) => {
         if (!imageSrc) { setError(t('photoTip')); return; }
         
