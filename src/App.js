@@ -569,7 +569,7 @@ export default function App() {
             const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
             
             const payload = {
-                model: "google/gemini-2.5-flash-image", // User requested model (Nano Banana)
+                model: "google/gemini-2.5-flash-image-preview", // User requested model (Nano Banana)
                 messages: [{
                     role: "user",
                     content: [
