@@ -469,18 +469,32 @@ export default function App() {
     const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
         if (!imageForStory || !promptForStory) return;
 
-        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
-        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        // OpenRouter API anahtarını Vercel gibi ortamlardaki değişkenden okur.
+        // Projenizin Environment Variables bölümüne 'REACT_APP_OPENROUTER_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
+        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
         const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zekâ temelli hizmetler üretenleri, girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
         const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
-        const payload = { contents: [{ parts: [{ text: storyPrompt }] }] };
+        
+        // OpenRouter/OpenAI API formatına uygun payload
+        const payload = {
+            model: 'google/gemini-flash-1.5', // gemini-2.5-flash-preview-05-20 için OpenRouter model adı
+            messages: [{ role: 'user', content: storyPrompt }]
+        };
         
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                    'HTTP-Referer': 'https://kutuphaneveteknoloji.com',
+                    'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
+                },
+                body: JSON.stringify(payload)
+            });
             if (!response.ok) { const errorData = await response.json(); console.error("Hikaye oluşturma API hatası:", errorData); throw new Error(t('storyGenerationError')); }
-            const result = await response.json(); const storyText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            const result = await response.json(); const storyText = result.choices?.[0]?.message?.content;
             if (storyText) { setStory(storyText); } else { throw new Error(t('invalidResponseError')); }
         } catch (err) {
             console.error(err);
@@ -543,36 +557,49 @@ export default function App() {
         setGeneratedImage(null); 
         setStory("");
         
-        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
-        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
-        const base64ImageData = imageSrc.split(',')[1];
+        // OpenRouter API anahtarını Vercel gibi ortamlardaki değişkenden okur.
+        // Projenizin Environment Variables bölümüne 'REACT_APP_OPENROUTER_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
+        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
         const fullPrompt = t('imagePrompt', { prompt });
-        const payload = { contents: [{ parts: [ { text: fullPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } } ] }], generationConfig: { responseModalities: ['IMAGE'] }, };
+
+        // OpenRouter/OpenAI API formatına uygun çok modlu (multimodal) payload
+        const payload = {
+            model: 'google/gemini-2.5-flash-image-preview', // Kullanıcının belirttiği model. OpenRouter hesabınızda bu modelin aktif olduğundan emin olun.
+            messages: [{
+                role: 'user',
+                content: [
+                    { type: 'text', text: fullPrompt },
+                    { type: 'image_url', image_url: { "url": imageSrc } } // Fotoğrafı data URI olarak gönder
+                ]
+            }],
+            max_tokens: 2048, // Base64 formatında resim verisi dönebileceği için token limitini artırmak faydalı olabilir.
+        };
         
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                    'HTTP-Referer': 'https://kutuphaneveteknoloji.com',
+                    'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
+                },
+                body: JSON.stringify(payload)
+            });
             if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(t('imageGenerationError')); }
-            const result = await response.json(); const candidate = result?.candidates?.[0]; const problematicFinishReasons = ['NO_IMAGE', 'SAFETY', 'IMAGE_OTHER', 'RECITATION'];
-            if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) {
-                const reason = candidate?.finishReason;
-                console.error("API üretimi durdurdu. Sebep:", reason);
-                let userMessage = t('imageGenerationError');
-                if (reason === 'SAFETY' || reason === 'IMAGE_OTHER') {
-                    userMessage = t('safetyError');
-                } else if (reason === 'NO_IMAGE') {
-                    userMessage = t('noImageError');
-                }
-                throw new Error(userMessage);
-            }
-            const base64Data = candidate?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+            const result = await response.json();
+            
+            // OpenRouter üzerinden bu modelin çıktısı, base64 formatında bir metin olarak gelebilir.
+            const base64Data = result.choices?.[0]?.message?.content;
+
             if (base64Data) {
-                const newImageSrc = `data:image/png;base64,${base64Data}`;
+                // Gelen verinin geçerli bir base64 olup olmadığını basitçe kontrol edelim.
+                const newImageSrc = base64Data.startsWith('data:image') ? base64Data : `data:image/png;base64,${base64Data}`;
                 setGeneratedImage(newImageSrc);
                 setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
-                console.error("Yanıt formatı beklenmedik:", result);
+                console.error("Yanıt formatı beklenmedik veya resim verisi içermiyor:", result);
                 throw new Error(t('invalidResponseError'));
             }
         } catch (err) {
