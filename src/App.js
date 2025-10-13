@@ -25,7 +25,7 @@ const translations = {
     promptInspiration: "Or choose one for inspiration:",
     promptPlaceholder: "e.g., Mysterious and atmospheric like Sherlock Holmes...",
     generateButton: "Create Artistic Portrait",
-    generateTip: "Let's transform your chosen novel character into an artistic portrait, blending it with the theme of library and technology!",
+    generateTip: "Let's transform your chosen novel character into an artistic portrait inspired by your photo, blending it with the theme of library and technology!",
     step3Title: "Step 3: Review Your Result",
     resultPlaceholder: "Your generated image will appear here.",
     downloadImage: "Download Image",
@@ -35,12 +35,13 @@ const translations = {
     copyImageShareText: "Copy Share Text",
     copyStoryShareText: "Copy Story Text",
     loadingImage: "AI is designing your portrait...",
-    loadingImageMessages: ["Adjusting colors and textures...","Adding artistic brush strokes...","Making final magical touches...","The AI is summoning its muses..."],
+    loadingImageMessages: ["AI is analyzing your photo...","Adjusting colors and textures...","Adding artistic brush strokes...","Making final magical touches...","The AI is summoning its muses..."],
     loadingStory: "Please wait... Writing a story for your character...",
     autoStoryLoadingMessages: ["Are you curious what your character would feel at the festival?","A literary universe is being created...","The final lines are being penned..."],
     errorPrefix: "An error occurred: ",
     imageGenerationError: "The AI could not create this image. Please try a different theme.",
     storyGenerationError: "Sorry, a special story for this character could not be written. Please try again.",
+    visionApiError: "The AI could not analyze your photo. Please try a clearer one.",
     apiErrorWithResponse: "{baseError} - Server response: {response}",
     safetyError: "Sorry, your request could not be processed due to safety filters. Please try a more artistic theme.",
     invalidResponseError: "Could not get a valid response from the AI.",
@@ -60,7 +61,7 @@ const translations = {
     shareTextWithStory: "\"{prompt}\" (Generated image). Visit www.kutuphaneveteknoloji.com to create your own AI image and story for the festival. #ktf #kutuphaneveteknolojifest\n\nHere is my story:\n{story}",
     canvasLine1: "I'm at the 3rd Int'l Library & Technology Festival, as {prompt}!",
     canvasLine2: "Create your own AI image for the festival at www.kutuphaneveteknoloji.com",
-    imagePrompt: `Create an artistic portrait with the theme "{prompt}". The background should combine library and technology elements. The style should be like a non-photorealistic digital art piece.`,
+    imageGenerationPrompt: "Generate an artistic, non-photorealistic digital art portrait based on the person in the provided image. The theme is \"{prompt}\". The background should combine library and technology elements. IMPORTANT: Respond with ONLY the raw base64-encoded string of the PNG image, without any markdown, formatting, or explanatory text.",
     storyPrompt: `You are a creative storyteller. Using the festival information I will provide, write a short (max 3 paragraphs), captivating story in English about the character from the generated image, based on the user's original prompt: '{prompt}'. The story should take place at the 3rd International Library and Technology Festival. The story must be consistent with the festival's main theme of "Producing Libraries", the atmosphere of the image, and the character's mood. Here's what you need to know about the festival: {festivalInfo}`,
     samplePrompts: ["Mysterious and clever like Sherlock Holmes", "A dystopian character from the novel 1984", "Captain Ahab from Moby Dick", "Adventurous like Don Quixote", "A Ghibli film character", "Romantic like Jane Eyre", "A Cyberpunk character", "Curious like Alice in Wonderland", "A Fremen from the Dune universe", "A Steampunk inventor", "Noble and wise like an elf", "Conflicted like Raskolnikov", "Thoughtful like The Little Prince"],
   },
@@ -68,7 +69,7 @@ const translations = {
     appTitle: "Kütüphane ve Teknoloji Festivali Stüdyosu",
     appSubtitle_part1: "Bu uygulama ",
     appSubtitle_link: "3. Uluslararası Kütüphane ve Teknoloji Festivali",
-    appSubtitle_part2: " kapsamında geliştirilmiştir.",
+    appSubtitle_part2: "kapsamında geliştirilmiştir.",
     appWebsite: "www.kutuphaneveteknoloji.com",
     languageToggle: "Switch to English",
     step1Title: "Adım 1: Fotoğrafınızı Seçin",
@@ -86,7 +87,7 @@ const translations = {
     promptInspiration: "Veya ilham almak için birini seçin:",
     promptPlaceholder: "Örn: Sherlock Holmes gibi gizemli bir havada...",
     generateButton: "Sanatsal Portre Oluştur",
-    generateTip: "Seçtiğiniz roman karakterini, kütüphane ve teknoloji temasıyla harmanlayarak sanatsal bir portreye dönüştürelim!",
+    generateTip: "Yüklediğiniz fotoğraftan ilham alarak, seçtiğiniz roman karakterini kütüphane ve teknoloji temasıyla harmanlayarak sanatsal bir portreye dönüştürelim!",
     step3Title: "Adım 3: Sonucu İnceleyin",
     resultPlaceholder: "Oluşturulan görseliniz burada görünecek.",
     downloadImage: "Görseli İndir",
@@ -96,12 +97,13 @@ const translations = {
     copyImageShareText: "Paylaşım Metnini Kopyala",
     copyStoryShareText: "Hikaye Metnini Kopyala",
     loadingImage: "Yapay zeka portrenizi tasarlıyor...",
-    loadingImageMessages: ["Renkler ve dokular ayarlanıyor...","Sanatsal fırça darbeleri ekleniyor...","Son sihirli dokunuşlar yapılıyor...","Yapay zeka ilham perilerini çağırıyor..."],
+    loadingImageMessages: ["Yapay zeka fotoğrafınızı analiz ediyor...","Renkler ve dokular ayarlanıyor...","Sanatsal fırça darbeleri ekleniyor...","Son sihirli dokunuşlar yapılıyor...","Yapay zeka ilham perilerini çağırıyor..."],
     loadingStory: "Lütfen bekleyin... Karakterinize hikaye yazılıyor...",
     autoStoryLoadingMessages: ["Karakterinizin festivale katılsa neler hissedebileceğini merak ediyor musunuz?", "Edebi bir evren yaratılıyor...", "Son satırlar kaleme alınıyor..."],
     errorPrefix: "Bir hata oluştu: ",
     imageGenerationError: "Yapay zeka bu görseli oluşturamadı. Lütfen farklı bir tema deneyin.",
     storyGenerationError: "Üzgünüz, bu karaktere özel bir hikaye yazılamadı. Lütfen tekrar deneyin.",
+    visionApiError: "Yapay zeka fotoğrafınızı analiz edemedi. Lütfen daha net bir fotoğraf deneyin.",
     apiErrorWithResponse: "{baseError} - Sunucu yanıtı: {response}",
     safetyError: "Üzgünüz, güvenlik filtreleri nedeniyle isteğiniz işlenemedi. Lütfen daha sanatsal bir tema deneyin.",
     invalidResponseError: "Yapay zekadan geçerli bir yanıt alınamadı.",
@@ -121,7 +123,7 @@ const translations = {
     shareTextWithStory: "\"{prompt}\" (Oluşturulan görsel). Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest\n\nİşte benim hikayem:\n{story}",
     canvasLine1: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Hem de {prompt} olarak!",
     canvasLine2: "Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz.",
-    imagePrompt: `"{prompt}" temalı sanatsal bir portre oluştur. Portrenin arka planı kütüphane ve teknoloji öğelerini birleştirmeli. Stil, fotogerçekçi olmayan bir dijital sanat eseri gibi olmalı.`,
+    imageGenerationPrompt: "Sağlanan resimdeki kişiye dayanarak sanatsal, fotogerçekçi olmayan bir dijital sanat portresi oluştur. Tema \"{prompt}\". Arka plan kütüphane ve teknoloji öğelerini birleştirmeli. ÖNEMLİ: Yanıt olarak SADECE PNG görselinin ham base64 kodlanmış metnini, herhangi bir markdown, biçimlendirme veya açıklayıcı metin olmadan döndür.",
     storyPrompt: `Yaratıcı bir hikaye anlatıcısısın. Sana vereceğim festival bilgilerini kullanarak, kullanıcının orijinal istemi olan '{prompt}' ve bu istemle oluşturulan görseldeki karakterden yola çıkarak, bu karakterin 3. Uluslararası Kütüphane ve Teknoloji Festivali'nde geçen kısa (en fazla 3 paragraflık), büyüleyici ve Türkçe bir hikayesini yaz. Hikaye, festivalin "Üreten Kütüphaneler" ana temasıyla, görseldeki atmosferle ve karakterin ruh haliyle uyumlu olsun. İşte festivalle ilgili bilmen gerekenler: {festivalInfo}`,
     samplePrompts: ["Sherlock Holmes gibi gizemli ve zeki", "1984 romanından distopik bir karakter", "Moby Dick'ten Kaptan Ahab", "Don Kişot gibi maceraperest", "Bir Ghibli film karakteri", "Jane Eyre gibi romantik", "Cyberpunk bir karakter", "Alice Harikalar Diyarında gibi meraklı", "Dune evreninden bir Fremen", "Steampunk bir mucit", "Bir elf gibi asil ve bilge", "Raskolnikov gibi çatışmalı", "Küçük Prens gibi düşünceli"],
   }
@@ -296,22 +298,24 @@ const ShareModal = ({ shareText, onClose, onCopy, story, onCopyStoryShare, t }) 
 
 const LoadingAnimation = ({ t, language, step }) => {
     const [loadingText, setLoadingText] = useState('');
+    const [messageIndex, setMessageIndex] = useState(0);
 
     useEffect(() => {
-        const messagesKey = step === 'story' ? 'autoStoryLoadingMessages' : 'loadingImageMessages';
-        const initialText = step === 'story' ? t('loadingStory') : t('loadingImage');
-        const loadingMessages = translations[language][messagesKey];
-        
-        setLoadingText(initialText);
-
-        let index = 0;
+        const loadingMessages = translations[language].loadingImageMessages;
         const intervalId = setInterval(() => {
-            setLoadingText(loadingMessages[index]);
-            index = (index + 1) % loadingMessages.length;
+            setMessageIndex(prevIndex => (prevIndex + 1) % loadingMessages.length);
         }, 2500);
-
         return () => clearInterval(intervalId);
-    }, [language, t, step]);
+    }, [language]);
+    
+    useEffect(() => {
+        if (step === 'story') {
+             setLoadingText(t('loadingStory'));
+        } else {
+            setLoadingText(translations[language].loadingImageMessages[messageIndex]);
+        }
+    }, [language, t, step, messageIndex]);
+
 
     return (
         <div className="loading-container-interactive">
@@ -469,8 +473,6 @@ export default function App() {
     const toggleLanguage = () => { setLanguage(prevLang => prevLang === 'tr' ? 'en' : 'tr'); };
 
     const handleGenerateStory = useCallback(async (promptForStory) => {
-        // VERCEL ENV DEĞİŞKENİ: Vercel projenizin ayarlarından "Environment Variables" bölümüne
-        // REACT_APP_OPENROUTER_API_KEY adıyla OpenRouter API anahtarınızı ekleyin.
         const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
         if (!apiKey) {
             const errorMsg = "OpenRouter API anahtarı bulunamadı. Lütfen Vercel ortam değişkenlerini kontrol edin.";
@@ -490,25 +492,14 @@ export default function App() {
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com',
-                    'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com', 'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu' },
                 body: JSON.stringify(payload)
             });
             
             if (!response.ok) {
                  const errorText = await response.text();
                  console.error("Hikaye oluşturma API hatası:", response.status, errorText);
-                 try {
-                     const errorData = JSON.parse(errorText);
-                     const message = errorData.error?.message || JSON.stringify(errorData);
-                     throw new Error(message);
-                 } catch (e) {
-                     throw new Error(t('apiErrorWithResponse', { baseError: t('storyGenerationError'), response: errorText || response.statusText }));
-                 }
+                 try { const errorData = JSON.parse(errorText); const message = errorData.error?.message || JSON.stringify(errorData); throw new Error(message); } catch (e) { throw new Error(t('apiErrorWithResponse', { baseError: t('storyGenerationError'), response: errorText || response.statusText })); }
             }
 
             const result = await response.json();
@@ -523,22 +514,12 @@ export default function App() {
     }, [t, language]);
 
     const onGenerateStory = async () => {
-        if (!generatedImage || !userPrompt) {
-            setError(t('storyNeedsImageError'));
-            return;
-        }
+        if (!generatedImage || !userPrompt) { setError(t('storyNeedsImageError')); return; }
         setLiveRegionText(t('loadingStory'));
         setIsStoryLoading(true);
         setStory('');
         setError(null);
-
-        try {
-            await handleGenerateStory(userPrompt);
-        } catch (e) {
-            // error is set inside handleGenerateStory
-        } finally {
-            setIsStoryLoading(false);
-        }
+        try { await handleGenerateStory(userPrompt); } catch (e) { /* error is set inside handleGenerateStory */ } finally { setIsStoryLoading(false); }
     };
 
     useEffect(() => {
@@ -575,8 +556,6 @@ export default function App() {
         setGeneratedImage(null); 
         setStory("");
         
-        // VERCEL ENV DEĞİŞKENİ: Vercel projenizin ayarlarından "Environment Variables" bölümüne
-        // REACT_APP_OPENROUTER_API_KEY adıyla OpenRouter API anahtarınızı ekleyin.
         const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
         if (!apiKey) {
             const errorMsg = "OpenRouter API anahtarı bulunamadı. Lütfen Vercel ortam değişkenlerini kontrol edin.";
@@ -586,51 +565,42 @@ export default function App() {
             return;
         }
 
-        const apiUrl = `https://openrouter.ai/api/v1/images/generations`;
-        
-        // ÖNEMLİ: OpenRouter metinden-görsele modelleri, girdi olarak bir fotoğraf almaz.
-        // Bu nedenle, kullanıcının fotoğrafı API'ye gönderilmez. Görsel sadece metin istemine göre oluşturulur.
-        const fullPrompt = t('imagePrompt', { prompt });
-        const payload = {
-            model: "stabilityai/stable-diffusion-xl-base-1.0",
-            prompt: fullPrompt,
-        };
-        
         try {
+            const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
+            
+            const payload = {
+                model: "google/gemini-2.5-flash-image", // User requested model (Nano Banana)
+                messages: [{
+                    role: "user",
+                    content: [
+                        { type: "text", text: t('imageGenerationPrompt', { prompt: prompt }) },
+                        { type: "image_url", image_url: { url: imageSrc } }
+                    ]
+                }]
+            };
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com',
-                    'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com', 'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu' },
                 body: JSON.stringify(payload)
             });
 
             if (!response.ok) {
-                 const errorText = await response.text();
-                 console.error("Görsel oluşturma API Hatası:", response.status, errorText);
-                 try {
-                     const errorData = JSON.parse(errorText);
-                     const message = errorData.error?.message || JSON.stringify(errorData);
-                     throw new Error(message);
-                 } catch (e) {
-                     throw new Error(t('apiErrorWithResponse', { baseError: t('imageGenerationError'), response: errorText || response.statusText }));
-                 }
+                const errorText = await response.text();
+                throw new Error(t('apiErrorWithResponse', { baseError: t('imageGenerationError'), response: errorText || response.statusText }));
             }
-            
+
             const result = await response.json();
-            const base64Data = result?.data?.[0]?.b64_json;
-            
-            if (base64Data) {
-                const newImageSrc = `data:image/png;base64,${base64Data}`;
+            const base64Data = result.choices?.[0]?.message?.content;
+
+            if (base64Data && base64Data.length > 100) { 
+                const cleanedBase64 = base64Data.replace(/```/g, '').replace(/json/g, '').replace(/png/g, '').trim();
+                const newImageSrc = `data:image/png;base64,${cleanedBase64}`;
                 setGeneratedImage(newImageSrc);
                 setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
-                console.error("Yanıt formatı beklenmedik:", result);
-                 if (result.error) { throw new Error(result.error.message); }
-                throw new Error(t('invalidResponseError'));
+                console.error("Image generation may have failed, response content was not valid base64:", base64Data);
+                throw new Error(t('imageGenerationError'));
             }
         } catch (err) {
             console.error(err);
