@@ -8,8 +8,8 @@ import { Camera, Zap, Upload, AlertTriangle, Download, Share2, BookOpen, BrainCi
 // --- Ortam değişkeni ---
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL_IMAGE = "google/gemini-2.0-flash-thinking-exp:free";
-const MODEL_STORY = "google/gemini-2.0-flash-thinking-exp:free";
+const MODEL_IMAGE = "google/gemini-2.5-flash-image-preview";
+const MODEL_STORY = "google/gemini-2.5-flash-preview-05-20";
 
 // --- Yardımcı fonksiyon: OpenRouter istekleri ---
 async function callOpenRouterAPI(prompt, imageBase64 = null, type = 'text') {
