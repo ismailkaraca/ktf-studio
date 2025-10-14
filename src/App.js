@@ -565,7 +565,7 @@ export default function App() {
 
         // OpenRouter/OpenAI API formatına uygun çok modlu (multimodal) payload
         const payload = {
-            model: 'google/gemini-pro-vision', // Görsel üretimi için daha yaygın ve uyumlu bir model
+            model: 'google/gemini-2.5-flash-image', // Görsel üretimi için daha yaygın ve uyumlu bir model
             messages: [{
                 role: 'user',
                 content: [
