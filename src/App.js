@@ -488,7 +488,7 @@ export default function App() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': 'https://kutuphaneveteknoloji.com',
+                    'HTTP-Referer': window.location.origin,
                     'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
                 },
                 body: JSON.stringify(payload)
@@ -582,7 +582,7 @@ export default function App() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': 'https://kutuphaneveteknoloji.com',
+                    'HTTP-Referer': window.location.origin,
                     'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
                 },
                 body: JSON.stringify(payload)
@@ -636,6 +636,4 @@ export default function App() {
         </div>
     );
 }
-
-
 
