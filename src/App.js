@@ -609,7 +609,7 @@ export default function App() {
         
         // imageSrc is a data URL already; send it directly for img2img
         const payload = {
-            model: "black-forest-labs/flux-1.1-pro",
+            model: "gemini-2.5-flash-image-preview",
             prompt: fullPrompt + " Keep the subject's identity recognizable but with non-photorealistic, artistic digital painting style.",
             image: imageSrc,
             strength: 0.65,            // 0..1, how strongly to follow the input image
