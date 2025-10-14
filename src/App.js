@@ -557,23 +557,16 @@ export default function App() {
         setGeneratedImage(null); 
         setStory("");
         
-        // OpenRouter API anahtarını Vercel gibi ortamlardaki değişkenden okur.
-        // Projenizin Environment Variables bölümüne 'REACT_APP_OPENROUTER_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
         const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
-        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
+        // DEĞİŞİKLİK: API endpoint'i ve modeli image-to-image için güncellendi
+        const apiUrl = `https://openrouter.ai/api/v1/images/generations`;
         const fullPrompt = t('imagePrompt', { prompt });
 
-        // OpenRouter/OpenAI API formatına uygun çok modlu (multimodal) payload
+        // DEĞİŞİKLİK: Stable Diffusion için yeni payload formatı
         const payload = {
-            model: 'google/gemini-2.5-flash-image', // Görsel üretimi için daha yaygın ve uyumlu bir model
-            messages: [{
-                role: 'user',
-                content: [
-                    { type: 'text', text: fullPrompt },
-                    { type: 'image_url', image_url: { "url": imageSrc } } // Fotoğrafı data URI olarak gönder
-                ]
-            }],
-            max_tokens: 4096, // Yanıtta büyük bir base64 verisi dönebileceği için token limitini artırmak faydalıdır.
+            model: 'stabilityai/sdxl-turbo', // image-to-image için daha uygun bir model
+            prompt: fullPrompt,
+            image: imageSrc.split(',')[1], // Base64 başlığını kaldır
         };
         
         try {
@@ -590,25 +583,11 @@ export default function App() {
             if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(t('imageGenerationError')); }
             const result = await response.json();
             
-            // --- YANIT İŞLEME DÜZELTMESİ ---
-            // API yanıtı, 'content' içinde bir dizi olarak gelebilir. Bu diziden görseli bulup çıkarmalıyız.
-            const messageContent = result.choices?.[0]?.message?.content;
-            let base64Data = null;
-
-            if (typeof messageContent === 'string') {
-                // Yanıt basit bir metin ise doğrudan ata
-                base64Data = messageContent;
-            } else if (Array.isArray(messageContent)) {
-                // Yanıt bir dizi ise, içindeki görseli bul
-                const imagePart = messageContent.find(part => part.type === 'image_url');
-                if (imagePart) {
-                    base64Data = imagePart.image_url.url;
-                }
-            }
+            // DEĞİŞİKLİK: Yeni /images/generations yanıt formatını işle
+            const base64Data = result.data?.[0]?.b64_json;
 
             if (base64Data) {
-                // Gelen verinin geçerli bir base64 olup olmadığını kontrol edip ayarla
-                const newImageSrc = base64Data.startsWith('data:image') ? base64Data : `data:image/png;base64,${base64Data}`;
+                const newImageSrc = `data:image/png;base64,${base64Data}`;
                 setGeneratedImage(newImageSrc);
                 setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
@@ -649,5 +628,4 @@ export default function App() {
         </div>
     );
 }
-
 
