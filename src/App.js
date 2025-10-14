@@ -564,7 +564,7 @@ export default function App() {
 
         // DEĞİŞİKLİK: Stable Diffusion için yeni payload formatı
         const payload = {
-            model: 'stabilityai/stable-diffusion-3-medium', // image-to-image için daha stabil ve güçlü bir model
+            model: 'google/gemini-2.5-flash-image-preview', // image-to-image için daha stabil ve güçlü bir model
             prompt: fullPrompt,
             image: imageSrc.split(',')[1], // Base64 başlığını kaldır
         };
