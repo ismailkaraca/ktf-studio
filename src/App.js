@@ -573,7 +573,7 @@ export default function App() {
                     { type: 'image_url', image_url: { "url": imageSrc } } // Fotoğrafı data URI olarak gönder
                 ]
             }],
-            max_tokens: 2048, // Base64 formatında resim verisi dönebileceği için token limitini artırmak faydalı olabilir.
+            max_tokens: 4096, // Yanıtta büyük bir base64 verisi dönebileceği için token limitini artırmak faydalıdır.
         };
         
         try {
@@ -590,11 +590,24 @@ export default function App() {
             if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(t('imageGenerationError')); }
             const result = await response.json();
             
-            // OpenRouter üzerinden bu modelin çıktısı, base64 formatında bir metin olarak gelebilir.
-            const base64Data = result.choices?.[0]?.message?.content;
+            // --- YANIT İŞLEME DÜZELTMESİ ---
+            // API yanıtı, 'content' içinde bir dizi olarak gelebilir. Bu diziden görseli bulup çıkarmalıyız.
+            const messageContent = result.choices?.[0]?.message?.content;
+            let base64Data = null;
+
+            if (typeof messageContent === 'string') {
+                // Yanıt basit bir metin ise doğrudan ata
+                base64Data = messageContent;
+            } else if (Array.isArray(messageContent)) {
+                // Yanıt bir dizi ise, içindeki görseli bul
+                const imagePart = messageContent.find(part => part.type === 'image_url');
+                if (imagePart) {
+                    base64Data = imagePart.image_url.url;
+                }
+            }
 
             if (base64Data) {
-                // Gelen verinin geçerli bir base64 olup olmadığını basitçe kontrol edelim.
+                // Gelen verinin geçerli bir base64 olup olmadığını kontrol edip ayarla
                 const newImageSrc = base64Data.startsWith('data:image') ? base64Data : `data:image/png;base64,${base64Data}`;
                 setGeneratedImage(newImageSrc);
                 setLiveRegionText(t('imageGeneratedSuccess'));
@@ -636,4 +649,5 @@ export default function App() {
         </div>
     );
 }
+
 
