@@ -564,7 +564,7 @@ export default function App() {
 
         // DEĞİŞİKLİK: Stable Diffusion için yeni payload formatı
         const payload = {
-            model: 'stabilityai/sdxl-turbo', // image-to-image için daha uygun bir model
+            model: 'stabilityai/stable-diffusion-3-medium', // image-to-image için daha stabil ve güçlü bir model
             prompt: fullPrompt,
             image: imageSrc.split(',')[1], // Base64 başlığını kaldır
         };
@@ -580,8 +580,29 @@ export default function App() {
                 },
                 body: JSON.stringify(payload)
             });
-            if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(t('imageGenerationError')); }
-            const result = await response.json();
+
+            // --- HATA YÖNETİMİ İYİLEŞTİRMESİ ---
+            // Önce yanıtı metin olarak alarak boş olup olmadığını kontrol et
+            const responseText = await response.text();
+            if (!responseText) {
+                throw new Error("API'dan boş yanıt alındı. Lütfen tekrar deneyin.");
+            }
+
+            // Metni JSON olarak ayrıştır
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                console.error("JSON ayrıştırma hatası:", responseText);
+                throw new Error(t('invalidResponseError'));
+            }
+
+            // Yanıt başarılı değilse, detaylı hatayı göster
+            if (!response.ok) {
+                console.error("API Hatası:", result);
+                const errorMessage = result?.error?.message || t('imageGenerationError');
+                throw new Error(errorMessage);
+            }
             
             // DEĞİŞİKLİK: Yeni /images/generations yanıt formatını işle
             const base64Data = result.data?.[0]?.b64_json;
@@ -628,4 +649,5 @@ export default function App() {
         </div>
     );
 }
+
 
