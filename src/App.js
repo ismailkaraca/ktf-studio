@@ -543,45 +543,13 @@ export default function App() {
         setGeneratedImage(null); 
         setStory("");
         
-const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
-const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
-
-// Request payload
-const payload = {
-    model: "google/gemini-2.5-flash-image-preview",
-    messages: [
-        {
-            role: "user",
-            content: fullPrompt
-        }
-    ],
-    modalities: ["image", "text"],
-    // Opsiyonel: aspect ratio eklemek isterseniz
-    image_config: {
-        aspect_ratio: "1:1" // veya istediğiniz oran
-    }
-};
-
-// API çağrısı için headers
-const headers = {
-    "Authorization": `Bearer ${apiKey}`,
-    "Content-Type": "application/json"
-};
-
-// Fetch çağrısı
-fetch(apiUrl, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify(payload)
-})
-.then(response => response.json())
-.then(result => {
-    if (result.choices && result.choices[0].message.images) {
-        const generatedImageUrl = result.choices[0].message.images[0].image_url.url;
-        // Burada generated image ile istediğiniz işlemi yapabilirsiniz
-    }
-});
-
+        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
+        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
+        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+        const base64ImageData = imageSrc.split(',')[1];
+        const fullPrompt = t('imagePrompt', { prompt });
+        const payload = { contents: [{ parts: [ { text: fullPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } } ] }], generationConfig: { responseModalities: ['IMAGE'] }, };
         
         try {
             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
