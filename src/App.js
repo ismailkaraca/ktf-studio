@@ -1,3 +1,5 @@
+// googleapiliApp.js (OpenRouter sürümü)
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, Zap, Upload, AlertTriangle, Download, Share2, BookOpen, BrainCircuit, Sparkles, Copy, RefreshCw, Languages } from 'lucide-react';
 
@@ -234,7 +236,7 @@ const CameraView = ({ onCapture, imageSrc, t }) => {
                 {imageSrc ? (<button onClick={handleRetake} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#bf24c6] text-white rounded-lg hover:bg-[#d435d1] transition-all transform hover:scale-105"><RefreshCw size={20} />{t('retake')}</button>) : (<> {!stream ? (<button onClick={startCamera} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#241bc6] text-white rounded-lg hover:bg-[#3a32d1] transition-all transform hover:scale-105"><Camera size={20} />{t('openCamera')}</button>) : (<button onClick={captureImage} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#bf24c6] text-white rounded-lg hover:bg-[#d435d1] transition-all transform hover:scale-105"><Zap size={20} />{t('takePhoto')}</button>)} <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all transform hover:scale-105"><Upload size={20} />{t('uploadPhoto')}</button> </>)}
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/jpeg, image/png" className="hidden" />
-            <p className="text-center text-xs text-gray-400 mt-2 max-w-md">{t('photoTip')}</p>
+            <p className="text-center text-xs text-gray-400 mt-2">{t('photoTip')}</p>
         </div>
     );
 };
@@ -466,22 +468,70 @@ export default function App() {
 
     const toggleLanguage = () => { setLanguage(prevLang => prevLang === 'tr' ? 'en' : 'tr'); };
 
+    // OpenRouter yardımcıları
+    const getOpenRouterHeaders = () => {
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
+        const referer = window?.location?.origin || "http://localhost";
+        const appTitle = "KTF Studio";
+        return {
+            apiKey,
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': referer,
+                'X-Title': appTitle,
+                'Accept': 'application/json',
+            }
+        };
+    };
+
+    const fetchAsDataUrl = async (url) => {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Image fetch failed');
+        const blob = await resp.blob();
+        return await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+    };
+
     const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
         if (!imageForStory || !promptForStory) return;
 
-        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
-        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const { apiKey, headers } = getOpenRouterHeaders();
+        if (!apiKey) {
+            throw new Error("OpenRouter API key not found. Please set REACT_APP_OPENROUTER_API_KEY.");
+        }
+
+        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
         const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zekâ temelli hizmetler üretenleri, girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
         const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
-        const payload = { contents: [{ parts: [{ text: storyPrompt }] }] };
+        const payload = {
+            model: "openai/gpt-4o-mini",
+            messages: [
+                { role: "system", content: "You are a helpful and creative writing assistant." },
+                { role: "user", content: storyPrompt }
+            ],
+            temperature: 0.9,
+            max_tokens: 600
+        };
         
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) { const errorData = await response.json(); console.error("Hikaye oluşturma API hatası:", errorData); throw new Error(t('storyGenerationError')); }
-            const result = await response.json(); const storyText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (storyText) { setStory(storyText); } else { throw new Error(t('invalidResponseError')); }
+            const response = await fetch(apiUrl, { method: 'POST', headers, body: JSON.stringify(payload) });
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error("Hikaye oluşturma API hatası:", result);
+                throw new Error(t('storyGenerationError'));
+            }
+            
+            const storyText = result?.choices?.[0]?.message?.content;
+            if (typeof storyText === 'string' && storyText.trim()) {
+                setStory(storyText.trim());
+            } else {
+                throw new Error(t('invalidResponseError'));
+            }
         } catch (err) {
             console.error(err);
             setError(err.message);
@@ -499,6 +549,7 @@ export default function App() {
         setIsStoryLoading(true);
         setStory('');
         setError(null);
+        setGenerationStep('story');
 
         try {
             await handleGenerateStory(userPrompt, generatedImage);
@@ -506,6 +557,7 @@ export default function App() {
             // error is set inside handleGenerateStory
         } finally {
             setIsStoryLoading(false);
+            setGenerationStep(null);
         }
     };
 
@@ -543,36 +595,63 @@ export default function App() {
         setGeneratedImage(null); 
         setStory("");
         
-        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
-        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
-        const base64ImageData = imageSrc.split(',')[1];
+        // OpenRouter Images API — img2img
+        const { apiKey, headers } = getOpenRouterHeaders();
+        if (!apiKey) {
+            setError("OpenRouter API key not found. Please set REACT_APP_OPENROUTER_API_KEY.");
+            setIsLoading(false);
+            setGenerationStep(null);
+            return;
+        }
+
+        const apiUrl = `https://openrouter.ai/api/v1/images`;
         const fullPrompt = t('imagePrompt', { prompt });
-        const payload = { contents: [{ parts: [ { text: fullPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } } ] }], generationConfig: { responseModalities: ['IMAGE'] }, };
+        
+        // imageSrc is a data URL already; send it directly for img2img
+        const payload = {
+            model: "black-forest-labs/flux-1.1-pro",
+            prompt: fullPrompt + " Keep the subject's identity recognizable but with non-photorealistic, artistic digital painting style.",
+            image: imageSrc,
+            strength: 0.65,            // 0..1, how strongly to follow the input image
+            size: "1024x1024",
+            output_format: "png",
+            num_images: 1
+        };
         
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(t('imageGenerationError')); }
-            const result = await response.json(); const candidate = result?.candidates?.[0]; const problematicFinishReasons = ['NO_IMAGE', 'SAFETY', 'IMAGE_OTHER', 'RECITATION'];
-            if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) {
-                const reason = candidate?.finishReason;
-                console.error("API üretimi durdurdu. Sebep:", reason);
-                let userMessage = t('imageGenerationError');
-                if (reason === 'SAFETY' || reason === 'IMAGE_OTHER') {
-                    userMessage = t('safetyError');
-                } else if (reason === 'NO_IMAGE') {
-                    userMessage = t('noImageError');
+            const response = await fetch(apiUrl, { method: 'POST', headers, body: JSON.stringify(payload) });
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error("Image API Error:", result);
+                // Basit güvenlik/hata eşleme
+                const msg = (result?.error?.message || '').toLowerCase();
+                if (msg.includes('safety') || msg.includes('policy')) {
+                    throw new Error(t('safetyError'));
                 }
-                throw new Error(userMessage);
+                throw new Error(t('imageGenerationError'));
             }
-            const base64Data = candidate?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-            if (base64Data) {
-                const newImageSrc = `data:image/png;base64,${base64Data}`;
+
+            let dataItem = result?.data?.[0];
+            if (!dataItem) {
+                throw new Error(t('invalidResponseError'));
+            }
+
+            // b64_json varsa onu kullan, yoksa url'i data URL'e çevir
+            if (dataItem.b64_json) {
+                const newImageSrc = `data:image/png;base64,${dataItem.b64_json}`;
                 setGeneratedImage(newImageSrc);
                 setLiveRegionText(t('imageGeneratedSuccess'));
+            } else if (dataItem.url) {
+                try {
+                    const dataUrl = await fetchAsDataUrl(dataItem.url);
+                    setGeneratedImage(dataUrl);
+                    setLiveRegionText(t('imageGeneratedSuccess'));
+                } catch (e) {
+                    console.error("Image URL to dataURL conversion failed:", e);
+                    throw new Error(t('invalidResponseError'));
+                }
             } else {
-                console.error("Yanıt formatı beklenmedik:", result);
                 throw new Error(t('invalidResponseError'));
             }
         } catch (err) {
@@ -609,6 +688,3 @@ export default function App() {
         </div>
     );
 }
-
-
-
