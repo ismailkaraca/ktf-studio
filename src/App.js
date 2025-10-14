@@ -469,7 +469,7 @@ export default function App() {
     const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
         if (!imageForStory || !promptForStory) return;
 
-        // OpenRouter API anahtarını Vercel gibi ortamlardaki değişkenden okur.
+        // OpenRouter API anahtarını gibi ortamlardaki değişkenden okur.
         // Projenizin Environment Variables bölümüne 'REACT_APP_OPENROUTER_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
         const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
         const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
@@ -478,7 +478,7 @@ export default function App() {
         
         // OpenRouter/OpenAI API formatına uygun payload
         const payload = {
-            model: 'google/gemini-flash-1.5', // gemini-2.5-flash-preview-05-20 için OpenRouter model adı
+            model: 'google/gemini-pro', // Hikaye üretimi için daha stabil bir model
             messages: [{ role: 'user', content: storyPrompt }]
         };
         
@@ -565,7 +565,7 @@ export default function App() {
 
         // OpenRouter/OpenAI API formatına uygun çok modlu (multimodal) payload
         const payload = {
-            model: 'google/gemini-2.5-flash-image-preview', // Kullanıcının belirttiği model. OpenRouter hesabınızda bu modelin aktif olduğundan emin olun.
+            model: 'google/gemini-pro-vision', // Görsel üretimi için daha yaygın ve uyumlu bir model
             messages: [{
                 role: 'user',
                 content: [
