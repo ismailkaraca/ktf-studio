@@ -469,32 +469,18 @@ export default function App() {
     const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
         if (!imageForStory || !promptForStory) return;
 
-        // OpenRouter API anahtarını gibi ortamlardaki değişkenden okur.
-        // Projenizin Environment Variables bölümüne 'REACT_APP_OPENROUTER_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
-        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
-        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
+        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
+        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
+        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zekâ temelli hizmetler üretenleri, girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
         const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
-        
-        // OpenRouter/OpenAI API formatına uygun payload
-        const payload = {
-            model: 'google/gemini-pro', // Hikaye üretimi için daha stabil bir model
-            messages: [{ role: 'user', content: storyPrompt }]
-        };
+        const payload = { contents: [{ parts: [{ text: storyPrompt }] }] };
         
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
-                },
-                body: JSON.stringify(payload)
-            });
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if (!response.ok) { const errorData = await response.json(); console.error("Hikaye oluşturma API hatası:", errorData); throw new Error(t('storyGenerationError')); }
-            const result = await response.json(); const storyText = result.choices?.[0]?.message?.content;
+            const result = await response.json(); const storyText = result.candidates?.[0]?.content?.parts?.[0]?.text;
             if (storyText) { setStory(storyText); } else { throw new Error(t('invalidResponseError')); }
         } catch (err) {
             console.error(err);
@@ -557,62 +543,68 @@ export default function App() {
         setGeneratedImage(null); 
         setStory("");
         
-        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
-        // DEĞİŞİKLİK: API endpoint'i ve modeli image-to-image için güncellendi
-        const apiUrl = `https://openrouter.ai/api/v1/images/generations`;
-        const fullPrompt = t('imagePrompt', { prompt });
+const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY || "";
+const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-        // DEĞİŞİKLİK: Stable Diffusion için yeni payload formatı
-        const payload = {
-            model: 'google/gemini-2.5-flash-image-preview', // image-to-image için daha stabil ve güçlü bir model
-            prompt: fullPrompt,
-            image: imageSrc.split(',')[1], // Base64 başlığını kaldır
-        };
+// Request payload
+const payload = {
+    model: "google/gemini-2.5-flash-image-preview",
+    messages: [
+        {
+            role: "user",
+            content: fullPrompt
+        }
+    ],
+    modalities: ["image", "text"],
+    // Opsiyonel: aspect ratio eklemek isterseniz
+    image_config: {
+        aspect_ratio: "1:1" // veya istediğiniz oran
+    }
+};
+
+// API çağrısı için headers
+const headers = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Content-Type": "application/json"
+};
+
+// Fetch çağrısı
+fetch(apiUrl, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload)
+})
+.then(response => response.json())
+.then(result => {
+    if (result.choices && result.choices[0].message.images) {
+        const generatedImageUrl = result.choices[0].message.images[0].image_url.url;
+        // Burada generated image ile istediğiniz işlemi yapabilirsiniz
+    }
+});
+
         
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'Kütüphane ve Teknoloji Festivali Stüdyosu'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            // --- HATA YÖNETİMİ İYİLEŞTİRMESİ ---
-            // Önce yanıtı metin olarak alarak boş olup olmadığını kontrol et
-            const responseText = await response.text();
-            if (!responseText) {
-                throw new Error("API'dan boş yanıt alındı. Lütfen tekrar deneyin.");
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(t('imageGenerationError')); }
+            const result = await response.json(); const candidate = result?.candidates?.[0]; const problematicFinishReasons = ['NO_IMAGE', 'SAFETY', 'IMAGE_OTHER', 'RECITATION'];
+            if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) {
+                const reason = candidate?.finishReason;
+                console.error("API üretimi durdurdu. Sebep:", reason);
+                let userMessage = t('imageGenerationError');
+                if (reason === 'SAFETY' || reason === 'IMAGE_OTHER') {
+                    userMessage = t('safetyError');
+                } else if (reason === 'NO_IMAGE') {
+                    userMessage = t('noImageError');
+                }
+                throw new Error(userMessage);
             }
-
-            // Metni JSON olarak ayrıştır
-            let result;
-            try {
-                result = JSON.parse(responseText);
-            } catch (e) {
-                console.error("JSON ayrıştırma hatası:", responseText);
-                throw new Error(t('invalidResponseError'));
-            }
-
-            // Yanıt başarılı değilse, detaylı hatayı göster
-            if (!response.ok) {
-                console.error("API Hatası:", result);
-                const errorMessage = result?.error?.message || t('imageGenerationError');
-                throw new Error(errorMessage);
-            }
-            
-            // DEĞİŞİKLİK: Yeni /images/generations yanıt formatını işle
-            const base64Data = result.data?.[0]?.b64_json;
-
+            const base64Data = candidate?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
             if (base64Data) {
                 const newImageSrc = `data:image/png;base64,${base64Data}`;
                 setGeneratedImage(newImageSrc);
                 setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
-                console.error("Yanıt formatı beklenmedik veya resim verisi içermiyor:", result);
+                console.error("Yanıt formatı beklenmedik:", result);
                 throw new Error(t('invalidResponseError'));
             }
         } catch (err) {
@@ -649,5 +641,6 @@ export default function App() {
         </div>
     );
 }
+
 
 
