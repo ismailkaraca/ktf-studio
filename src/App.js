@@ -1,4 +1,4 @@
-	import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, Zap, Upload, AlertTriangle, Download, Share2, BookOpen, BrainCircuit, Sparkles, Copy, RefreshCw, Languages } from 'lucide-react';
 
 // --- I18n Translations ---
@@ -133,22 +133,22 @@ const GlobalStyles = () => (
         :root { --safe-top: env(safe-area-inset-top, 0px); }
         .section { scroll-margin-top: calc(84px + var(--safe-top)); }
         @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+            html { scroll-behavior: auto !important; }
+            /* Hareket azaltma ayarı etkin olsa bile, kullanıcıya geri bildirim sağlamak için yükleme animasyonunu koruyoruz. */
         }
-        .loading-container-interactive { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; width: 100%; height: 100%; }
-        .ai-orb { position: relative; width: 128px; height: 128px; border-radius: 9999px; background: radial-gradient(circle, rgba(36, 27, 198, 0.6) 0%, rgba(36, 27, 198, 0.1) 70%); animation: orb-pulse 4s ease-in-out infinite; }
-        .ai-orb-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #E8E8FF; animation: icon-fade 4s ease-in-out infinite; }
-        .ai-orb-icon.icon-2 { animation-delay: 2s; }
-        .orbiting-particle { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background-color: #bf24c6; border-radius: 9999px; box-shadow: 0 0 8px #bf24c6, 0 0 12px #bf24c6; animation: orbit 6s linear infinite; }
-        .orbiting-particle:nth-child(2) { animation-duration: 8s; animation-delay: -2s; width: 4px; height: 4px; }
-        .orbiting-particle:nth-child(3) { animation-duration: 5s; animation-delay: -3s; }
-        .orbiting-particle:nth-child(4) { animation-duration: 10s; animation-delay: -1s; width: 8px; height: 8px; }
-        @keyframes orb-pulse { 50% { transform: scale(1.1); } }
-        @keyframes orbit { from { transform: translate(-50%, -50%) rotate(0deg) translateX(80px) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg) translateX(80px) rotate(-360deg); } }
-        @keyframes icon-fade { 0%, 49.99%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } 10%, 40% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-        .story-loading-cursor { display: inline-block; width: 10px; height: 1.2em; background-color: #bf24c6; margin-left: 8px; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .loading-container-interactive { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; width: 100%; height: 100%; }
+        .spinner {
+            width: 64px;
+            height: 64px;
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #bf24c6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         video { transform: scaleX(-1); }
     `}</style>
 );
@@ -213,7 +213,39 @@ const CameraView = ({ onCapture, imageSrc, t }) => {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => { onCapture(e.target.result); stopCamera(); };
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1280;
+                    const MAX_HEIGHT = 720;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = Math.round(height * (MAX_WIDTH / width));
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = Math.round(width * (MAX_HEIGHT / height));
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                    onCapture(dataUrl);
+                    stopCamera();
+                };
+                img.onerror = () => {
+                    setCameraError(t('fileReadError'));
+                };
+                img.src = e.target.result;
+            };
             reader.onerror = (err) => { console.error("Dosya okuma hatası:", err); setCameraError(t('fileReadError')); };
             reader.readAsDataURL(file);
         }
@@ -313,14 +345,7 @@ const LoadingAnimation = ({ t, language, step }) => {
 
     return (
         <div className="loading-container-interactive">
-            <div className="ai-orb">
-                <div className="orbiting-particle"></div>
-                <div className="orbiting-particle"></div>
-                <div className="orbiting-particle"></div>
-                <div className="orbiting-particle"></div>
-                <BookOpen size={48} className="ai-orb-icon icon-1" />
-                <BrainCircuit size={48} className="ai-orb-icon icon-2" />
-            </div>
+            <div className="spinner"></div>
             <p className="font-semibold text-lg text-center text-gray-200">{loadingText}</p>
         </div>
     );
@@ -336,6 +361,13 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
     
     useEffect(() => { if (generatedImage && !isLoading && downloadButtonRef.current) { setTimeout(() => downloadButtonRef.current.focus({ preventScroll: true }), 100); } }, [generatedImage, isLoading]);
     useEffect(() => { if (error && errorRef.current) { setTimeout(() => errorRef.current.focus({ preventScroll: true }), 100); } }, [error]);
+
+    const handleRetry = () => {
+        const cameraSection = document.getElementById('cameraSection');
+        if (cameraSection) {
+            cameraSection.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' });
+        }
+    }
 
     const drawTextAndBackground = (ctx, text, yPos, canvas, options = {}) => {
         const { width } = canvas; const { customFontSize = null } = options; const padding = width * 0.05; const maxWidth = width - (padding * 2); let fontSize; if (customFontSize) { fontSize = customFontSize; } else { fontSize = Math.max(16, Math.min(30, Math.round(width / 35))); } const lineHeight = fontSize * 1.3; ctx.font = `bold ${fontSize}px "Inter", Arial, sans-serif`; ctx.textAlign = 'center'; const x = width / 2; const words = text.split(' '); let line = ''; const lines = []; for (const word of words) { const testLine = line + word + ' '; if (ctx.measureText(testLine).width > maxWidth && line.length > 0) { lines.push(line.trim()); line = word + ' '; } else { line = testLine; } } lines.push(line.trim()); const textBlockHeight = lines.length * lineHeight; const verticalPadding = lineHeight * 0.3; const rectHeight = textBlockHeight + (verticalPadding * 2); const rectY = yPos - rectHeight; const startY = rectY + verticalPadding; ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0, rectY, width, rectHeight); ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 4; ctx.textBaseline = 'top'; lines.forEach((l, index) => { const currentY = startY + (index * lineHeight); ctx.strokeText(l, x, currentY); ctx.fillText(l, x, currentY); }); const gap = 15; return rectHeight + gap;
@@ -388,7 +420,18 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
             {showShareModal && <ShareModal shareText={t('shareText', { prompt: userPrompt })} onClose={() => setShowShareModal(false)} onCopy={handleCopyToClipboard} story={story} onCopyStoryShare={handleCopyStoryShareText} t={t} />}
             <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative flex items-center justify-center">
                 {isLoading && <LoadingAnimation t={t} language={language} step={generationStep} />}
-                {error && (<div ref={errorRef} tabIndex="-1" role="alert" className="flex flex-col items-center gap-4 text-red-400 p-4"><AlertTriangle size={48} /><p className="text-center">{error}</p></div>)}
+                {error && (<div ref={errorRef} tabIndex="-1" role="alert" className="flex flex-col items-center gap-4 text-red-400 p-4">
+                    <AlertTriangle size={48} />
+                    <p className="text-center font-bold">{error.message}</p>
+                    {error.type === 'noImage' && (
+                        <>
+                            <p className="text-center text-sm text-gray-300 mt-2 bg-black/20 p-3 rounded-lg">{t('photoTip')}</p>
+                            <button onClick={handleRetry} className="mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-[#bf24c6] text-white rounded-lg hover:bg-[#d435d1] transition-all">
+                                <RefreshCw size={20} /> {t('retake')}
+                            </button>
+                        </>
+                    )}
+                </div>)}
                 {generatedImage && !isLoading && (<canvas ref={canvasRef} className="w-full h-full object-contain" />)}
                 {!isLoading && !error && !generatedImage && (<div className="text-gray-400 text-center"><p>{t('resultPlaceholder')}</p></div>)}
             </div>
@@ -410,21 +453,18 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
                         )}
                     </div>
 
-                    {!story && !isStoryLoading && !error && (
-                        <div className="mt-6 text-center p-4 bg-black/20 rounded-lg w-full max-w-lg">
-                             <p className="mb-3 text-gray-300 font-semibold">{t('generateStoryPrompt')}</p>
-                             <button onClick={onGenerateStory} className="flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-[#bf24c6] to-[#241bc6] text-white rounded-lg font-bold hover:opacity-90 transition-opacity transform hover:scale-105">
-                                 <Sparkles size={20}/> {t('generateStoryButton')}
-                             </button>
+                    {isStoryLoading && (
+                         <div className="mt-4 p-4 w-full max-w-lg flex flex-col items-center justify-center">
+                            <LoadingAnimation t={t} language={language} step="story" />
                         </div>
                     )}
 
-                    {isStoryLoading && (
-                        <div className="mt-4 p-4 bg-black/30 rounded-lg w-full max-w-lg flex flex-col items-center justify-center gap-3">
-                            <p className="text-gray-300 font-semibold">{t('loadingStory')}</p>
-                            <div className="w-full bg-gray-700 rounded-full h-2">
-                                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 h-2 rounded-full animate-pulse"></div>
-                            </div>
+                    {!story && !isStoryLoading && !error && (
+                        <div className="mt-6 flex flex-col items-center gap-3 text-center p-4 bg-black/20 rounded-lg w-full max-w-lg">
+                             <p className="text-gray-300 font-semibold">{t('generateStoryPrompt')}</p>
+                             <button onClick={onGenerateStory} className="flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-[#bf24c6] to-[#241bc6] text-white rounded-lg font-bold hover:opacity-90 transition-opacity transform hover:scale-105">
+                                 <Sparkles size={20}/> {t('generateStoryButton')}
+                             </button>
                         </div>
                     )}
 
@@ -469,9 +509,7 @@ export default function App() {
     const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
         if (!imageForStory || !promptForStory) return;
 
-        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
-        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+        const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zekâ temelli hizmetler üretenleri, girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
         const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
@@ -484,7 +522,7 @@ export default function App() {
             if (storyText) { setStory(storyText); } else { throw new Error(t('invalidResponseError')); }
         } catch (err) {
             console.error(err);
-            setError(err.message);
+            setError({ message: err.message || t('storyGenerationError'), type: 'generic' });
             setLiveRegionText(`${t('errorPrefix')}${err.message}`);
             throw err; 
         }
@@ -492,7 +530,7 @@ export default function App() {
 
     const onGenerateStory = async () => {
         if (!generatedImage || !userPrompt) {
-            setError(t('storyNeedsImageError'));
+            setError({ message: t('storyNeedsImageError'), type: 'user' });
             return;
         }
         setLiveRegionText(t('loadingStory'));
@@ -530,7 +568,7 @@ export default function App() {
     };
     
     const handleGenerateImage = async (mode, prompt) => {
-        if (!imageSrc) { setError(t('photoTip')); return; }
+        if (!imageSrc) { setError({ message: t('photoTip'), type: 'user' }); return; }
         
         const resultSection = document.getElementById('resultSection');
         if (resultSection) { resultSection.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' }); }
@@ -543,28 +581,28 @@ export default function App() {
         setGeneratedImage(null); 
         setStory("");
         
-        // API anahtarını Vercel gibi hosting platformlarındaki ortam değişkenlerinden okur.
-        // Projenizin Environment Variables bölümünde 'REACT_APP_GEMINI_API_KEY' adıyla kendi anahtarınızı eklemelisiniz.
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+        const apiKey = process.env.REACT_APP_GEMINI_API_KEY; const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
         const base64ImageData = imageSrc.split(',')[1];
         const fullPrompt = t('imagePrompt', { prompt });
         const payload = { contents: [{ parts: [ { text: fullPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } } ] }], generationConfig: { responseModalities: ['IMAGE'] }, };
         
         try {
             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw new Error(t('imageGenerationError')); }
+            if (!response.ok) { const errorData = await response.json(); console.error("API Hatası:", errorData); throw { message: t('imageGenerationError'), type: 'generic' }; }
             const result = await response.json(); const candidate = result?.candidates?.[0]; const problematicFinishReasons = ['NO_IMAGE', 'SAFETY', 'IMAGE_OTHER', 'RECITATION'];
             if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) {
                 const reason = candidate?.finishReason;
                 console.error("API üretimi durdurdu. Sebep:", reason);
                 let userMessage = t('imageGenerationError');
+                let errorType = 'generic';
                 if (reason === 'SAFETY' || reason === 'IMAGE_OTHER') {
                     userMessage = t('safetyError');
+                    errorType = 'safety';
                 } else if (reason === 'NO_IMAGE') {
                     userMessage = t('noImageError');
+                    errorType = 'noImage';
                 }
-                throw new Error(userMessage);
+                throw { message: userMessage, type: errorType };
             }
             const base64Data = candidate?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
             if (base64Data) {
@@ -573,12 +611,14 @@ export default function App() {
                 setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
                 console.error("Yanıt formatı beklenmedik:", result);
-                throw new Error(t('invalidResponseError'));
+                throw { message: t('invalidResponseError'), type: 'generic' };
             }
         } catch (err) {
             console.error(err);
-            setError(err.message);
-            setLiveRegionText(`${t('errorPrefix')}${err.message}`);
+            const errorMessage = err.message || t('imageGenerationError');
+            const errorType = err.type || 'generic';
+            setError({ message: errorMessage, type: errorType });
+            setLiveRegionText(`${t('errorPrefix')}${errorMessage}`);
         } finally {
             setIsLoading(false);
             setGenerationStep(null);
@@ -609,6 +649,8 @@ export default function App() {
         </div>
     );
 }
+
+
 
 
 
