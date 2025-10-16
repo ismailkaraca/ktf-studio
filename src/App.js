@@ -134,7 +134,6 @@ const GlobalStyles = () => (
         .section { scroll-margin-top: calc(84px + var(--safe-top)); }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto !important; }
-            /* Hareket azaltma ayarı etkin olsa bile, kullanıcıya geri bildirim sağlamak için yükleme animasyonunu koruyoruz. */
         }
         .loading-container-interactive { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; width: 100%; height: 100%; }
         .spinner {
@@ -605,18 +604,19 @@ export default function App() {
         const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
         const base64ImageData = imageSrc.split(',')[1];
         const fullPrompt = t('imagePrompt', { prompt });
+        
         const payload = {
-            model: 'google/gemini-2.5-flash-image-preview',
+            model: 'anthropic/claude-opus-4-1-vision',
             messages: [
                 {
                     role: 'user',
                     content: [
                         { type: 'text', text: fullPrompt },
-                        { type: 'image', image: `data:image/jpeg;base64,${base64ImageData}` }
+                        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64ImageData } }
                     ]
                 }
             ],
-            max_tokens: 4096
+            max_tokens: 2048
         };
         
         try {
@@ -628,28 +628,27 @@ export default function App() {
                 }, 
                 body: JSON.stringify(payload) 
             });
+            
             if (!response.ok) { 
                 const errorData = await response.json(); 
                 console.error("API Hatası:", errorData); 
                 throw { message: t('imageGenerationError'), type: 'generic' }; 
             }
+            
             const result = await response.json(); 
             const content = result.choices?.[0]?.message?.content;
             
-            // OpenRouter returns base64 image in the content
-            if (content && typeof content === 'string' && content.startsWith('/9j')) {
-                const newImageSrc = `data:image/jpeg;base64,${content}`;
-                setGeneratedImage(newImageSrc);
-                setLiveRegionText(t('imageGeneratedSuccess'));
-            } else if (content && typeof content === 'string') {
-                // Try to extract base64 from response
-                const base64Match = content.match(/([A-Za-z0-9+/=]{100,})/);
+            if (content && typeof content === 'string') {
+                const base64Match = content.match(/([A-Za-z0-9+/=]{200,})/);
+                
                 if (base64Match) {
-                    const newImageSrc = `data:image/jpeg;base64,${base64Match[0]}`;
+                    const extractedBase64 = base64Match[0];
+                    const newImageSrc = `data:image/png;base64,${extractedBase64}`;
                     setGeneratedImage(newImageSrc);
                     setLiveRegionText(t('imageGeneratedSuccess'));
                 } else {
-                    throw { message: t('invalidResponseError'), type: 'generic' };
+                    console.log("API döndü:", content.substring(0, 100));
+                    throw { message: t('noImageError'), type: 'noImage' };
                 }
             } else {
                 console.error("Yanıt formatı beklenmedik:", result);
