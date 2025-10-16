@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, Zap, Upload, AlertTriangle, Download, Share2, BookOpen, BrainCircuit, Sparkles, Copy, RefreshCw, Languages, Play } from 'lucide-react';
+import { Camera, Zap, Upload, AlertTriangle, Download, Share2, BookOpen, BrainCircuit, Sparkles, Copy, RefreshCw, Languages } from 'lucide-react';
 
 // --- I18n Translations ---
 const translations = {
@@ -9,7 +9,7 @@ const translations = {
     appSubtitle_link: "3rd International Library and Technology Festival",
     appSubtitle_part2: ".",
     appWebsite: "www.kutuphaneveteknoloji.com",
-    languageToggle: "Türkçe'ye Geç",
+    languageToggle: "Türçe'ye Geç",
     step1Title: "Step 1: Choose Your Photo",
     cameraOff: "Camera is off or waiting for a photo",
     cameraPermissionError: "Camera permission denied. Please refresh the page, try again, and allow camera access in your browser settings.",
@@ -24,48 +24,43 @@ const translations = {
     promptLabel: "Enter your favorite novel or character:",
     promptInspiration: "Or choose one for inspiration:",
     promptPlaceholder: "e.g., Mysterious and atmospheric like Sherlock Holmes...",
-    generateButton: "Create Artistic Video",
-    generateTip: "Let's transform your photo into an artistic video portrait of your chosen novel character, blending it with the theme of library and technology!",
+    generateButton: "Create Artistic Portrait",
+    generateTip: "Let's transform your photo into an artistic portrait of your chosen novel character, blending it with the theme of library and technology!",
     step3Title: "Step 3: Review Your Result",
-    resultPlaceholder: "Your generated video will appear here.",
-    downloadVideo: "Download Video",
-    shareOnSocial: "Share Video on Social Media",
+    resultPlaceholder: "Your generated image will appear here.",
+    downloadImage: "Download Image",
+    shareOnSocial: "Share Image on Social Media",
     yourStory: "Behold, Your Legend!",
     copyStory: "Copy Story",
-    copyVideoShareText: "Copy Share Text",
+    copyImageShareText: "Copy Share Text",
     copyStoryShareText: "Copy Story Text",
-    loadingVideo: "AI is creating your video...",
-    loadingVideoMessages: ["Generating key frames...","Adding transitions and effects...","Composing motion sequences...","The AI is weaving magic...","Finalizing your cinematic moment..."],
+    loadingImage: "AI is designing your portrait...",
+    loadingImageMessages: ["Adjusting colors and textures...","Adding artistic brush strokes...","Making final magical touches...","The AI is summoning its muses..."],
     loadingStory: "Please wait... Writing a story for your character...",
     autoStoryLoadingMessages: ["Are you curious what your character would feel at the festival?","A literary universe is being created...","The final lines are being penned..."],
     errorPrefix: "An error occurred: ",
-    videoGenerationError: "The AI could not create this video. Please try a different theme or a clearer photo.",
-    safetyError: "Sorry, the AI has restrictions on creating content involving people. Your request could not be processed. Please try a more artistic theme.",
-    invalidResponseError: "Could not get a valid video from the AI.",
+    imageGenerationError: "The AI could not create this image. Please try a different theme or a clearer photo.",
+    safetyError: "Sorry, the AI has restrictions on creating realistic images involving people. Your request could not be processed. Please try a more artistic theme.",
+    invalidResponseError: "Could not get a valid image from the AI.",
     noImageError: "The AI could not detect a clear face in this photo. Please try a different or clearer photo.",
     storyGenerationError: "Sorry, a special story for this character could not be written. Please try again.",
-    storyNeedsVideoError: "You must create a video first.",
-    videoGeneratedSuccess: "Your video has been successfully created.",
+    storyNeedsImageError: "You must create an image first.",
+    imageGeneratedSuccess: "Your image has been successfully created.",
     generateStoryPrompt: "Curious what this character would feel at the festival?",
     generateStoryButton: "Create Their Story",
     textCopied: "Text copied to clipboard!",
     copyError: "Could not copy!",
     shareModalTitle: "Share on Social Media",
-    instagramTip: "For Instagram: Download the video and upload it manually from the Instagram app.",
+    instagramTip: "For Instagram: Download the image and upload it manually from the Instagram app.",
     copyShareText: "Copy Share Text",
     copyShareTextWithStory: "Copy Share Text with Story",
     close: "Close",
-    shareText: "I'm at the 3rd International Library and Technology Festival, as \"{prompt}\". Visit www.kutuphaneveteknoloji.com to create your own AI video for the festival. #ktf #kutuphaneveteknolojifest",
-    shareTextWithStory: "\"{prompt}\" (Generated video). Visit www.kutuphaneveteknoloji.com to create your own AI video and story for the festival. #ktf #kutuphaneveteknolojifest\n\nHere is my story:\n{story}",
-    videoPrompt: `Create an artistic video portrait inspired by the character concept: "{prompt}". The video should:
-- Feature dramatic, cinematic cinematography with smooth camera movements
-- Incorporate library and technology elements in the background or setting
-- Use artistic, non-photorealistic digital art style with rich colors and textures
-- Show the character in a contemplative or action pose with subtle movements
-- Duration: 5 seconds
-- Aspect ratio: 16:9
-- Style: Ethereal, magical, and inspiring - suitable for a cultural festival
-Make it visually stunning and emotionally resonant.`,
+    shareText: "I'm at the 3rd International Library and Technology Festival, as \"{prompt}\". Visit www.kutuphaneveteknoloji.com to create your own AI image for the festival. #ktf #kutuphaneveteknolojifest",
+    shareTextWithStory: "\"{prompt}\" (Generated image). Visit www.kutuphaneveteknoloji.com to create your own AI image and story for the festival. #ktf #kutuphaneveteknolojifest\n\nHere is my story:\n{story}",
+    canvasLine1: "I'm at the 3rd Int'l Library & Technology Festival, as {prompt}!",
+    canvasLine2: "Create your own AI image for the festival at www.kutuphaneveteknoloji.com",
+    imagePrompt: `Create an artistic portrait inspired by the person in this photo. The theme of the portrait should be "{prompt}". The background should combine library and technology elements. The style should be like a non-photorealistic digital art piece.`,
+    storyPrompt: `You are a creative storyteller. Using the festival information I will provide, write a short (max 3 paragraphs), captivating story in English about the character from the generated image, based on the user's original prompt: '{prompt}'. The story should take place at the 3rd International Library and Technology Festival. The story must be consistent with the festival's main theme of "Producing Libraries", the atmosphere of the image, and the character's mood. Here's what you need to know about the festival: {festivalInfo}`,
     samplePrompts: ["Mysterious and clever like Sherlock Holmes", "A dystopian character from the novel 1984", "Captain Ahab from Moby Dick", "Adventurous like Don Quixote", "A Ghibli film character", "Romantic like Jane Eyre", "A Cyberpunk character", "Curious like Alice in Wonderland", "A Fremen from the Dune universe", "A Steampunk inventor", "Noble and wise like an elf", "Conflicted like Raskolnikov", "Thoughtful like The Little Prince"],
   },
   tr: {
@@ -84,53 +79,48 @@ Make it visually stunning and emotionally resonant.`,
     takePhoto: "Fotoğraf Çek",
     uploadPhoto: "Fotoğraf Yükle",
     retake: "Tekrar Çek/Yükle",
-    photoTip: "En iyi sonuçlar için lütfen sadece bir kişinin olduğu ve yüzünün net bir şekilde görüldüğü bir fotoğraf yükleyin.",
+    photoTip: "En iyi sonuçlar için lütfen sadece bir kişinin olduğu ve yüzünün net bir şekilde göründüğü bir fotoğraf yükleyin.",
     step2Title: "Adım 2: Tarzınızı Belirleyin",
     promptLabel: "En sevdiğiniz roman veya karakteri girin:",
     promptInspiration: "Veya ilham almak için birini seçin:",
     promptPlaceholder: "Örn: Sherlock Holmes gibi gizemli bir havada...",
-    generateButton: "Sanatsal Video Oluştur",
-    generateTip: "Yüklediğiniz fotoğrafı, kütüphane ve teknoloji temasıyla harmanlayarak seçtiğiniz roman karakterinin sanatsal bir video portresine dönüştürelim!",
+    generateButton: "Sanatsal Portre Oluştur",
+    generateTip: "Yüklediğiniz fotoğrafı, kütüphane ve teknoloji temasıyla harmanlayarak seçtiğiniz roman karakterinin sanatsal bir portresine dönüştürelim!",
     step3Title: "Adım 3: Sonucu İnceleyin",
-    resultPlaceholder: "Oluşturulan videonuz burada görünecek.",
-    downloadVideo: "Videoyu İndir",
-    shareOnSocial: "Videoyu Sosyal Medyada Paylaş",
+    resultPlaceholder: "Oluşturulan görseliniz burada göründecek.",
+    downloadImage: "Görseli İndir",
+    shareOnSocial: "Görseli Sosyal Medyada Paylaş",
     yourStory: "İşte Senin Efsanen!",
     copyStory: "Hikayeyi Kopyala",
-    copyVideoShareText: "Paylaşım Metnini Kopyala",
+    copyImageShareText: "Paylaşım Metnini Kopyala",
     copyStoryShareText: "Hikaye Metnini Kopyala",
-    loadingVideo: "Yapay zeka videonuzu oluşturuyor...",
-    loadingVideoMessages: ["Anahtar kareler üretiliyor...","Geçişler ve efektler ekleniyor...","Hareket dizileri oluşturuluyor...","Yapay zeka sihir dokuyuyor...","Sinematik anınız finalize ediliyor..."],
+    loadingImage: "Yapay zeka portrenizi tasarlıyor...",
+    loadingImageMessages: ["Renkler ve dokular ayarlanıyor...","Sanatsal fırça darbeleri ekleniyor...","Son sihirli dokunuşlar yapılıyor...","Yapay zeka ilham perilerini çağırıyor..."],
     loadingStory: "Lütfen bekleyin... Karakterinize hikaye yazılıyor...",
     autoStoryLoadingMessages: ["Karakterinizin festivale katılsa neler hissedebileceğini merak ediyor musunuz?", "Edebi bir evren yaratılıyor...", "Son satırlar kaleme alınıyor..."],
     errorPrefix: "Bir hata oluştu: ",
-    videoGenerationError: "Yapay zeka bu videoyu oluşturamadı. Lütfen farklı bir tema veya daha net bir fotoğraf deneyin.",
-    safetyError: "Üzgünüz, yapay zeka insan içeren içerik oluşturma konusunda kısıtlamalara sahip. Bu nedenle isteğiniz işlenemedi. Lütfen daha sanatsal bir tema deneyin.",
-    invalidResponseError: "Yapay zekadan geçerli bir video alınamadı.",
+    imageGenerationError: "Yapay zeka bu görseli oluşturamadı. Lütfen farklı bir tema veya daha net bir fotoğraf deneyin.",
+    safetyError: "Üzgünüz, yapay zeka insan içeren gerçekçi görseller oluşturma konusunda kısıtlamalara sahip. Bu nedenle isteğiniz işlenemedi. Lütfen daha sanatsal bir tema deneyin.",
+    invalidResponseError: "Yapay zekadan geçerli bir görsel alınamadı.",
     noImageError: "Yapay zeka bu fotoğrafta net bir yüz algılayamadı. Lütfen farklı veya daha net bir fotoğraf deneyin.",
     storyGenerationError: "Üzgünüz, bu karaktere özel bir hikaye yazılamadı. Lütfen tekrar deneyin.",
-    storyNeedsVideoError: "Önce bir video oluşturmalısınız.",
-    videoGeneratedSuccess: "Videonuz başarıyla oluşturuldu.",
+    storyNeedsImageError: "Önce bir görsel oluşturmalısınız.",
+    imageGeneratedSuccess: "Görseliniz başarıyla oluşturuldu.",
     generateStoryPrompt: "Bu karakterin festivalde neler hissedebileceğini merak ediyor musun?",
     generateStoryButton: "Hikayesini Oluştur",
     textCopied: "Metin panoya kopyalandı!",
     copyError: "Kopyalanamadı!",
     shareModalTitle: "Sosyal Medyada Paylaş",
-    instagramTip: "Instagram için: Videoyu indirip, Instagram uygulamasından manuel olarak yükleyebilirsiniz.",
+    instagramTip: "Instagram için: Görseli indirip, Instagram uygulamasından manuel olarak yükleyebilirsiniz.",
     copyShareText: "Paylaşım Metnini Kopyala",
     copyShareTextWithStory: "Paylaşım Metnini Hikaye İle Kopyala",
     close: "Kapat",
-    shareText: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim, hem de \"{prompt}\". Festival kapsamında kendi yapay zeka videonuzu oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest",
-    shareTextWithStory: "\"{prompt}\" (Oluşturulan video). Festival kapsamında kendi yapay zeka videonuzu oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest\n\nİşte benim hikayem:\n{story}",
-    videoPrompt: `Şu karakter konseptinden ilham alarak sanatsal bir video portresi oluştur: "{prompt}". Video şunları içermeli:
-- Dramatik, sinematik sinemotografi ve pürüzsüz kamera hareketleri
-- Arka planda veya ortamda kütüphane ve teknoloji öğeleri
-- Zengin renkler ve dokularla sanatsal, fotogerçekçi olmayan dijital sanat stili
-- Karakterin düşünceye dalmış veya aksiyon pozunda zarif hareketleriyle gösterilmesi
-- Süre: 5 saniye
-- En-boy oranı: 16:9
-- Stil: Sihirli, ilahi ve esin verici - kültürel festival için uygun
-Görsel olarak muhteşem ve duygusal olarak etkileyici olsun.`,
+    shareText: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim, hem de \"{prompt}\". Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest",
+    shareTextWithStory: "\"{prompt}\" (Oluşturulan görsel). Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest\n\nİşte benim hikayem:\n{story}",
+    canvasLine1: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Hem de {prompt} olarak!",
+    canvasLine2: "Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz.",
+    imagePrompt: `Bu fotoğraftaki kişiden ilham alarak sanatsal bir portre oluştur. Portrenin teması "{prompt}" olmalı. Arka plan, kütüphane ve teknoloji öğelerini birleştirmeli. Stil, fotogergekçi olmayan bir dijital sanat eseri gibi olmalı.`,
+    storyPrompt: `Yaratıcı bir hikaye anlatıcısısın. Sana vereceğim festival bilgilerini kullanarak, kullanıcının orijinal istemi olan '{prompt}' ve bu istemle oluşturulan görseldeki karakterden yola çıkarak, bu karakterin 3. Uluslararası Kütüphane ve Teknoloji Festivali'nde geçen kısa (en fazla 3 paragraflık), büyüleyici ve Türkçe bir hikayesini yaz. Hikaye, festivalin "Üreten Kütüphaneler" ana temasıyla, görseldeki atmosferle ve karakterin ruh haliyle uyumlu olsun. İşte festivalle ilgili bilmen gerekenler: {festivalInfo}`,
     samplePrompts: ["Sherlock Holmes gibi gizemli ve zeki", "1984 romanından distopik bir karakter", "Moby Dick'ten Kaptan Ahab", "Don Quixote gibi maceraperest", "Bir Ghibli film karakteri", "Jane Eyre gibi romantik", "Cyberpunk bir karakter", "Alice Harikalar Diyarında gibi meraklı", "Dune evreninden bir Fremen", "Steampunk bir mucit", "Bir elf gibi asil ve bilge", "Raskolnikov gibi çatışmalı", "Küçük Prens gibi düşünceli"],
   }
 };
@@ -144,6 +134,7 @@ const GlobalStyles = () => (
         .section { scroll-margin-top: calc(84px + var(--safe-top)); }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto !important; }
+            /* Hareket azaltma ayarı etkin olsa bile, kullanıcıya geri bildirim sağlamak için yükleme animasyonunu koruyoruz. */
         }
         .loading-container-interactive { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; width: 100%; height: 100%; }
         .spinner {
@@ -154,6 +145,7 @@ const GlobalStyles = () => (
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -303,7 +295,7 @@ const PromptControls = React.forwardRef(({ onGenerate, imageSrc, t, language }, 
                     </div>
                 </div>
                 <textarea id="characterInput" ref={ref} value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={t('promptPlaceholder')} className="w-full flex-grow p-3 rounded-lg bg-gray-800 border border-gray-600 focus:ring-2 focus:ring-[#bf24c6] text-white resize-none" rows="3" disabled={!imageSrc}></textarea>
-                <button id="btnCreateArt" onClick={() => onGenerate('video', prompt)} disabled={!imageSrc || !prompt} className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#bf24c6] to-[#241bc6] text-white rounded-lg font-bold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"><Zap size={20} /> {t('generateButton')}</button>
+                <button id="btnCreateArt" onClick={() => onGenerate('character', prompt)} disabled={!imageSrc || !prompt} className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#bf24c6] to-[#241bc6] text-white rounded-lg font-bold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"><Zap size={20} /> {t('generateButton')}</button>
                 <p className="text-center text-xs text-gray-400 mt-3">{t('generateTip')}</p>
             </div>
         </div>
@@ -323,7 +315,7 @@ const ShareModal = ({ shareText, onClose, onCopy, story, onCopyStoryShare, t }) 
                     {socialLinks.map(link => (<a href={link.url} target="_blank" rel="noopener noreferrer" key={link.name} className="bg-gray-700 hover:bg-gray-600 text-white text-center py-3 rounded-lg transition-colors">{link.name}</a>))}
                 </div>
                 <div className="mt-4 p-3 bg-gray-900 rounded-lg text-sm text-gray-300 text-center"><strong>Instagram:</strong> {t('instagramTip')}</div>
-                <button onClick={onCopy} className="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg transition-colors">{t('copyVideoShareText')}</button>
+                <button onClick={onCopy} className="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg transition-colors">{t('copyImageShareText')}</button>
                 {story && (<button onClick={onCopyStoryShare} className="mt-2 w-full bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-lg transition-colors">{t('copyStoryShareText')}</button>)}
                 <button onClick={onClose} className="mt-2 w-full text-gray-400 hover:text-white py-2">{t('close')}</button>
             </div>
@@ -336,8 +328,8 @@ const LoadingAnimation = ({ t, language, step }) => {
     const [loadingText, setLoadingText] = useState('');
 
     useEffect(() => {
-        const messagesKey = step === 'story' ? 'autoStoryLoadingMessages' : 'loadingVideoMessages';
-        const initialText = step === 'story' ? t('loadingStory') : t('loadingVideo');
+        const messagesKey = step === 'story' ? 'autoStoryLoadingMessages' : 'loadingImageMessages';
+        const initialText = step === 'story' ? t('loadingStory') : t('loadingImage');
         const loadingMessages = translations[language][messagesKey];
         
         setLoadingText(initialText);
@@ -360,14 +352,14 @@ const LoadingAnimation = ({ t, language, step }) => {
 };
 
 
-const VideoOutput = ({ generatedVideo, isLoading, isStoryLoading, onGenerateStory, error, userPrompt, story, t, language, generationStep }) => {
-    const videoRef = useRef(null);
+const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStory, error, userPrompt, story, t, language, generationStep }) => {
+    const canvasRef = useRef(null);
     const downloadButtonRef = useRef(null);
     const errorRef = useRef(null);
     const [toast, setToast] = useState(null);
     const [showShareModal, setShowShareModal] = useState(false);
     
-    useEffect(() => { if (generatedVideo && !isLoading && downloadButtonRef.current) { setTimeout(() => downloadButtonRef.current.focus({ preventScroll: true }), 100); } }, [generatedVideo, isLoading]);
+    useEffect(() => { if (generatedImage && !isLoading && downloadButtonRef.current) { setTimeout(() => downloadButtonRef.current.focus({ preventScroll: true }), 100); } }, [generatedImage, isLoading]);
     useEffect(() => { if (error && errorRef.current) { setTimeout(() => errorRef.current.focus({ preventScroll: true }), 100); } }, [error]);
 
     const handleRetry = () => {
@@ -376,22 +368,33 @@ const VideoOutput = ({ generatedVideo, isLoading, isStoryLoading, onGenerateStor
             cameraSection.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' });
         }
     }
+
+    const drawTextAndBackground = (ctx, text, yPos, canvas, options = {}) => {
+        const { width } = canvas; const { customFontSize = null } = options; const padding = width * 0.05; const maxWidth = width - (padding * 2); let fontSize; if (customFontSize) { fontSize = customFontSize; } else { fontSize = Math.max(16, Math.min(30, Math.round(width / 35))); } const lineHeight = fontSize * 1.3; ctx.font = `bold ${fontSize}px "Inter", Arial, sans-serif`; ctx.textAlign = 'center'; const x = width / 2; const words = text.split(' '); let line = ''; const lines = []; for (const word of words) { const testLine = line + word + ' '; if (ctx.measureText(testLine).width > maxWidth && line.length > 0) { lines.push(line.trim()); line = word + ' '; } else { line = testLine; } } lines.push(line.trim()); const textBlockHeight = lines.length * lineHeight; const verticalPadding = lineHeight * 0.3; const rectHeight = textBlockHeight + (verticalPadding * 2); const rectY = yPos - rectHeight; const startY = rectY + verticalPadding; ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0, rectY, width, rectHeight); ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 4; ctx.textBaseline = 'top'; lines.forEach((l, index) => { const currentY = startY + (index * lineHeight); ctx.strokeText(l, x, currentY); ctx.fillText(l, x, currentY); }); const gap = 15; return rectHeight + gap;
+    };
+    
+    useEffect(() => {
+         if (generatedImage && !isLoading && canvasRef.current) { 
+             const canvas = canvasRef.current; const ctx = canvas.getContext('2d'); const img = new Image(); img.src = generatedImage; 
+             img.onload = () => { 
+                canvas.width = img.width; canvas.height = img.height; ctx.drawImage(img, 0, 0); 
+                const overlayTexts = { line1: t('canvasLine1', { prompt: userPrompt }), line2: t('canvasLine2') }; 
+                const bottomMargin = canvas.height * 0.05; const smallerFontSize = Math.max(10, Math.round(canvas.width / 55)); 
+                const block2Height = drawTextAndBackground(ctx, overlayTexts.line2, canvas.height - bottomMargin, canvas, { customFontSize: smallerFontSize });
+                drawTextAndBackground(ctx, overlayTexts.line1, canvas.height - bottomMargin - block2Height, canvas, {});
+             }; 
+        }
+    }, [generatedImage, isLoading, userPrompt, t]);
     
     const handleShare = async () => {
-        if (!videoRef.current) return;
+        if (!canvasRef.current) return;
         const shareText = t('shareText', { prompt: userPrompt });
         const title = t('appTitle');
-        
         try {
-            const response = await fetch(generatedVideo);
-            const blob = await response.blob();
-            const file = new File([blob], 'ktf-studyosu-video.mp4', { type: 'video/mp4' });
-            
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title: title, text: shareText });
-            } else {
-                throw new Error("Cannot share files on this browser.");
-            }
+            const blob = await new Promise(resolve => canvasRef.current.toBlob(resolve, 'image/png'));
+            const file = new File([blob], 'ktf-studyosu-gorsel.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: title, text: shareText, });
+            } else { throw new Error("Cannot share files on this browser."); }
         } catch (error) {
             console.warn("Web Share API failed or not supported, falling back to modal:", error);
             setShowShareModal(true);
@@ -399,41 +402,16 @@ const VideoOutput = ({ generatedVideo, isLoading, isStoryLoading, onGenerateStor
     };
     
     const copyToClipboard = (textToCopy) => {
-        const textArea = document.createElement("textarea");
-        textArea.value = textToCopy;
-        textArea.style.position = "fixed";
-        textArea.style.top = "-9999px";
-        textArea.style.left = "-9999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-            if (document.execCommand('copy')) {
-                setToast({ message: t('textCopied'), type: 'success' });
-                return true;
-            }
-            return false;
-        } catch (err) {
-            console.error('Kopyalama hatası:', err);
-            setToast({ message: t('copyError'), type: 'error' });
-            return false;
-        } finally {
-            document.body.removeChild(textArea);
-        }
+        const textArea = document.createElement("textarea"); textArea.value = textToCopy; textArea.style.position = "fixed"; textArea.style.top = "-9999px"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select();
+        try { if (document.execCommand('copy')) { setToast({ message: t('textCopied'), type: 'success' }); return true; } return false;
+        } catch (err) { console.error('Kopyalama hatası:', err); setToast({ message: t('copyError'), type: 'error' }); return false;
+        } finally { document.body.removeChild(textArea); }
     };
     
     const handleCopyToClipboard = () => { copyToClipboard(t('shareText', { prompt: userPrompt })); };
     const handleCopyStory = () => { if (story) { copyToClipboard(story); } };
     const handleCopyStoryShareText = () => { copyToClipboard(t('shareTextWithStory', { prompt: userPrompt, story: story })); };
-    
-    const downloadVideo = () => {
-        const link = document.createElement('a');
-        link.href = generatedVideo;
-        link.download = 'ktf-studyosu-video.mp4';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+    const downloadImage = () => { if (canvasRef.current) { const link = document.createElement('a'); link.href = canvasRef.current.toDataURL('image/png'); link.download = 'ktf-studyosu-gorsel.png'; document.body.appendChild(link); link.click(); document.body.removeChild(link); } };
 
     return (
         <div id="resultSection" className="section w-full p-4 border-2 border-dashed border-[#bf24c6]/50 rounded-2xl bg-black/20 flex flex-col items-center justify-center min-h-[400px]">
@@ -454,21 +432,19 @@ const VideoOutput = ({ generatedVideo, isLoading, isStoryLoading, onGenerateStor
                         </>
                     )}
                 </div>)}
-                {generatedVideo && !isLoading && (
-                    <video ref={videoRef} src={generatedVideo} className="w-full h-full object-contain" controls />
-                )}
-                {!isLoading && !error && !generatedVideo && (<div className="text-gray-400 text-center"><p>{t('resultPlaceholder')}</p></div>)}
+                {generatedImage && !isLoading && (<canvas ref={canvasRef} className="w-full h-full object-contain" />)}
+                {!isLoading && !error && !generatedImage && (<div className="text-gray-400 text-center"><p>{t('resultPlaceholder')}</p></div>)}
             </div>
-             {generatedVideo && !isLoading && (
+             {generatedImage && !isLoading && (
                 <div className="mt-4 flex flex-col items-center gap-4 w-full">
                     <div className="flex flex-wrap justify-center gap-4">
-                        <button ref={downloadButtonRef} onClick={downloadVideo} className="flex items-center justify-center gap-2 px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all transform hover:scale-105"><Download size={20} /> {t('downloadVideo')}</button>
+                        <button ref={downloadButtonRef} onClick={downloadImage} className="flex items-center justify-center gap-2 px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all transform hover:scale-105"><Download size={20} /> {t('downloadImage')}</button>
                         <button onClick={handleShare} aria-label={t('shareOnSocial')} className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all transform hover:scale-105"><Share2 size={20} /> {t('shareOnSocial')}</button>
                     </div>
 
                     <div className="flex flex-col items-center gap-2 w-full max-w-md">
                         <button onClick={handleCopyToClipboard} className="w-full flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity transform hover:scale-105">
-                            <Copy size={20}/> {t('copyVideoShareText')}
+                            <Copy size={20}/> {t('copyImageShareText')}
                         </button>
                         {story && !isStoryLoading && (
                              <button onClick={handleCopyStoryShareText} className="w-full flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity transform hover:scale-105">
@@ -511,7 +487,7 @@ const VideoOutput = ({ generatedVideo, isLoading, isStoryLoading, onGenerateStor
 // --- Ana Uygulama ---
 export default function App() {
     const [imageSrc, setImageSrc] = useState(null);
-    const [generatedVideo, setGeneratedVideo] = useState(null);
+    const [generatedImage, setGeneratedImage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isStoryLoading, setIsStoryLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -530,20 +506,40 @@ export default function App() {
 
     const toggleLanguage = () => { setLanguage(prevLang => prevLang === 'tr' ? 'en' : 'tr'); };
 
-    const handleGenerateStory = useCallback(async (promptForStory, videoForStory) => {
-        if (!videoForStory || !promptForStory) return;
+    const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
+        if (!imageForStory || !promptForStory) return;
 
-        const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-        const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi'nde "Üreten Kütüphaneler" ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zeka temelli hizmetler üreten girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY;
+        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
+        const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi'nde "Üreten Kütüphaneler" ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zekâ temelli hizmetler üretenleri, girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
         const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
-        const payload = { contents: [{ parts: [{ text: storyPrompt }] }] };
+        const payload = {
+            model: 'google/gemini-2.5-flash-preview-09-2025',
+            messages: [{ role: 'user', content: storyPrompt }],
+            max_tokens: 1000
+        };
         
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) { const errorData = await response.json(); console.error("Hikaye oluşturma API hatası:", errorData); throw new Error(t('storyGenerationError')); }
-            const result = await response.json(); const storyText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (storyText) { setStory(storyText); } else { throw new Error(t('invalidResponseError')); }
+            const response = await fetch(apiUrl, { 
+                method: 'POST', 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                }, 
+                body: JSON.stringify(payload) 
+            });
+            if (!response.ok) { 
+                const errorData = await response.json(); 
+                console.error("Hikaye oluşturma API hatası:", errorData); 
+                throw new Error(t('storyGenerationError')); 
+            }
+            const result = await response.json(); 
+            const storyText = result.choices?.[0]?.message?.content;
+            if (storyText) { 
+                setStory(storyText); 
+            } else { 
+                throw new Error(t('invalidResponseError')); 
+            }
         } catch (err) {
             console.error(err);
             setError({ message: err.message || t('storyGenerationError'), type: 'generic' });
@@ -553,8 +549,8 @@ export default function App() {
     }, [t]);
 
     const onGenerateStory = async () => {
-        if (!generatedVideo || !userPrompt) {
-            setError({ message: t('storyNeedsVideoError'), type: 'user' });
+        if (!generatedImage || !userPrompt) {
+            setError({ message: t('storyNeedsImageError'), type: 'user' });
             return;
         }
         setLiveRegionText(t('loadingStory'));
@@ -563,7 +559,7 @@ export default function App() {
         setError(null);
 
         try {
-            await handleGenerateStory(userPrompt, generatedVideo);
+            await handleGenerateStory(userPrompt, generatedImage);
         } catch (e) {
             // error is set inside handleGenerateStory
         } finally {
@@ -578,7 +574,7 @@ export default function App() {
     }, []);
 
     const handleCapture = (dataUrl) => {
-        setImageSrc(dataUrl); setGeneratedVideo(null); setError(null); setStory("");
+        setImageSrc(dataUrl); setGeneratedImage(null); setError(null); setStory("");
         if (isMobile && dataUrl && promptInputRef.current) {
              const promptSection = document.getElementById('characterInputSection');
             if (promptSection) {
@@ -591,63 +587,77 @@ export default function App() {
         }
     };
     
-    const handleGenerateVideo = async (mode, prompt) => {
+    const handleGenerateImage = async (mode, prompt) => {
         if (!imageSrc) { setError({ message: t('photoTip'), type: 'user' }); return; }
         
         const resultSection = document.getElementById('resultSection');
         if (resultSection) { resultSection.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' }); }
         
-        setLiveRegionText(t('loadingVideo')); 
+        setLiveRegionText(t('loadingImage')); 
         setUserPrompt(prompt); 
         setIsLoading(true);
-        setGenerationStep('video');
+        setGenerationStep('image');
         setError(null); 
-        setGeneratedVideo(null); 
+        setGeneratedImage(null); 
         setStory("");
         
-        const falApiKey = process.env.REACT_APP_FAL_API_KEY;
-        const apiUrl = 'https://fal.run/fal-ai/kling-video/v2.5-turbo/pro/text-to-video';
-        
-        // Enhanced prompt for video generation
-        const enhancedPrompt = t('videoPrompt', { prompt });
-        
+        const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY;
+        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
+        const base64ImageData = imageSrc.split(',')[1];
+        const fullPrompt = t('imagePrompt', { prompt });
         const payload = {
-            prompt: enhancedPrompt,
-            duration: "5",
-            aspect_ratio: "16:9",
-            negative_prompt: "blur, distort, low quality, static, boring",
-            cfg_scale: 0.7
+            model: 'google/gemini-2.5-flash-image-preview',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        { type: 'text', text: fullPrompt },
+                        { type: 'image', image: `data:image/jpeg;base64,${base64ImageData}` }
+                    ]
+                }
+            ],
+            max_tokens: 4096
         };
         
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Key ${falApiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+            const response = await fetch(apiUrl, { 
+                method: 'POST', 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                }, 
+                body: JSON.stringify(payload) 
             });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error("API Hatası:", errorData);
-                throw { message: t('videoGenerationError'), type: 'generic' };
+            if (!response.ok) { 
+                const errorData = await response.json(); 
+                console.error("API Hatası:", errorData); 
+                throw { message: t('imageGenerationError'), type: 'generic' }; 
             }
+            const result = await response.json(); 
+            const content = result.choices?.[0]?.message?.content;
             
-            const result = await response.json();
-            const videoUrl = result?.video?.url;
-            
-            if (videoUrl) {
-                setGeneratedVideo(videoUrl);
-                setLiveRegionText(t('videoGeneratedSuccess'));
+            // OpenRouter returns base64 image in the content
+            if (content && typeof content === 'string' && content.startsWith('/9j')) {
+                const newImageSrc = `data:image/jpeg;base64,${content}`;
+                setGeneratedImage(newImageSrc);
+                setLiveRegionText(t('imageGeneratedSuccess'));
+            } else if (content && typeof content === 'string') {
+                // Try to extract base64 from response
+                const base64Match = content.match(/([A-Za-z0-9+/=]{100,})/);
+                if (base64Match) {
+                    const newImageSrc = `data:image/jpeg;base64,${base64Match[0]}`;
+                    setGeneratedImage(newImageSrc);
+                    setLiveRegionText(t('imageGeneratedSuccess'));
+                } else {
+                    throw { message: t('invalidResponseError'), type: 'generic' };
+                }
             } else {
                 console.error("Yanıt formatı beklenmedik:", result);
                 throw { message: t('invalidResponseError'), type: 'generic' };
             }
         } catch (err) {
             console.error(err);
-            const errorMessage = err.message || t('videoGenerationError');
+            const errorMessage = err.message || t('imageGenerationError');
             const errorType = err.type || 'generic';
             setError({ message: errorMessage, type: errorType });
             setLiveRegionText(`${t('errorPrefix')}${errorMessage}`);
@@ -664,9 +674,9 @@ export default function App() {
             <Header t={t} toggleLanguage={toggleLanguage} />
             <main className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <CameraView onCapture={handleCapture} imageSrc={imageSrc} t={t} />
-                <PromptControls ref={promptInputRef} onGenerate={handleGenerateVideo} imageSrc={imageSrc} t={t} language={language} />
-                <VideoOutput 
-                    generatedVideo={generatedVideo} 
+                <PromptControls ref={promptInputRef} onGenerate={handleGenerateImage} imageSrc={imageSrc} t={t} language={language} />
+                <ImageOutput 
+                    generatedImage={generatedImage} 
                     isLoading={isLoading} 
                     isStoryLoading={isStoryLoading}
                     onGenerateStory={onGenerateStory}
