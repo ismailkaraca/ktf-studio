@@ -59,7 +59,7 @@ const translations = {
     shareTextWithStory: "\"{prompt}\" (Generated image). Visit www.kutuphaneveteknoloji.com to create your own AI image and story for the festival. #ktf #kutuphaneveteknolojifest\n\nHere is my story:\n{story}",
     canvasLine1: "I'm at the 3rd Int'l Library & Technology Festival, as {prompt}!",
     canvasLine2: "Create your own AI image for the festival at www.kutuphaneveteknoloji.com",
-    imagePrompt: `Create an artistic portrait inspired by the person in this photo. The theme of the portrait should be "{prompt}". The background should combine library and technology elements. The style should be like a non-photorealistic digital art piece.`,
+    imagePrompt: `Create an artistic portrait of a character inspired by {prompt}. The character should have a library and technology theme in the background. Style: digital art, fantasy, non-photorealistic. The character embodies the essence of a book character at a cultural festival.`,
     storyPrompt: `You are a creative storyteller. Using the festival information I will provide, write a short (max 3 paragraphs), captivating story in English about the character from the generated image, based on the user's original prompt: '{prompt}'. The story should take place at the 3rd International Library and Technology Festival. The story must be consistent with the festival's main theme of "Producing Libraries", the atmosphere of the image, and the character's mood. Here's what you need to know about the festival: {festivalInfo}`,
     samplePrompts: ["Mysterious and clever like Sherlock Holmes", "A dystopian character from the novel 1984", "Captain Ahab from Moby Dick", "Adventurous like Don Quixote", "A Ghibli film character", "Romantic like Jane Eyre", "A Cyberpunk character", "Curious like Alice in Wonderland", "A Fremen from the Dune universe", "A Steampunk inventor", "Noble and wise like an elf", "Conflicted like Raskolnikov", "Thoughtful like The Little Prince"],
   },
@@ -119,7 +119,7 @@ const translations = {
     shareTextWithStory: "\"{prompt}\" (Oluşturulan görsel). Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest\n\nİşte benim hikayem:\n{story}",
     canvasLine1: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Hem de {prompt} olarak!",
     canvasLine2: "Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz.",
-    imagePrompt: `Bu fotoğraftaki kişiden ilham alarak sanatsal bir portre oluştur. Portrenin teması "{prompt}" olmalı. Arka plan, kütüphane ve teknoloji öğelerini birleştirmeli. Stil, fotogergekçi olmayan bir dijital sanat eseri gibi olmalı.`,
+    imagePrompt: `{prompt} karakterinden ilham alarak sanatsal bir portre oluştur. Karakter kütüphane ve teknoloji temasını yansıtmalı. Stil: dijital sanat, fantezi, fotogerçekçi olmayan. Karakter kültür festivalinde kitap karakterinin özünü yansıtmalı.`,
     storyPrompt: `Yaratıcı bir hikaye anlatıcısısın. Sana vereceğim festival bilgilerini kullanarak, kullanıcının orijinal istemi olan '{prompt}' ve bu istemle oluşturulan görseldeki karakterden yola çıkarak, bu karakterin 3. Uluslararası Kütüphane ve Teknoloji Festivali'nde geçen kısa (en fazla 3 paragraflık), büyüleyici ve Türkçe bir hikayesini yaz. Hikaye, festivalin "Üreten Kütüphaneler" ana temasıyla, görseldeki atmosferle ve karakterin ruh haliyle uyumlu olsun. İşte festivalle ilgili bilmen gerekenler: {festivalInfo}`,
     samplePrompts: ["Sherlock Holmes gibi gizemli ve zeki", "1984 romanından distopik bir karakter", "Moby Dick'ten Kaptan Ahab", "Don Quixote gibi maceraperest", "Bir Ghibli film karakteri", "Jane Eyre gibi romantik", "Cyberpunk bir karakter", "Alice Harikalar Diyarında gibi meraklı", "Dune evreninden bir Fremen", "Steampunk bir mucit", "Bir elf gibi asil ve bilge", "Raskolnikov gibi çatışmalı", "Küçük Prens gibi düşünceli"],
   }
@@ -322,7 +322,6 @@ const ShareModal = ({ shareText, onClose, onCopy, story, onCopyStoryShare, t }) 
     );
 };
 
-
 const LoadingAnimation = ({ t, language, step }) => {
     const [loadingText, setLoadingText] = useState('');
 
@@ -349,7 +348,6 @@ const LoadingAnimation = ({ t, language, step }) => {
         </div>
     );
 };
-
 
 const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStory, error, userPrompt, story, t, language, generationStep }) => {
     const canvasRef = useRef(null);
@@ -601,22 +599,16 @@ export default function App() {
         setStory("");
         
         const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY;
-        const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
-        const base64ImageData = imageSrc.split(',')[1];
+        const apiUrl = `https://openrouter.ai/api/v1/images/generations`;
         const fullPrompt = t('imagePrompt', { prompt });
         
         const payload = {
-            model: 'anthropic/claude-opus-4-1-vision',
-            messages: [
-                {
-                    role: 'user',
-                    content: [
-                        { type: 'text', text: fullPrompt },
-                        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64ImageData } }
-                    ]
-                }
-            ],
-            max_tokens: 2048
+            model: 'stability.ai/stable-diffusion-3-large',
+            prompt: fullPrompt,
+            num_images: 1,
+            width: 1024,
+            height: 1024,
+            steps: 40
         };
         
         try {
@@ -635,21 +627,17 @@ export default function App() {
                 throw { message: t('imageGenerationError'), type: 'generic' }; 
             }
             
-            const result = await response.json(); 
-            const content = result.choices?.[0]?.message?.content;
+            const result = await response.json();
+            const imageUrl = result.data?.[0]?.url;
             
-            if (content && typeof content === 'string') {
-                const base64Match = content.match(/([A-Za-z0-9+/=]{200,})/);
-                
-                if (base64Match) {
-                    const extractedBase64 = base64Match[0];
-                    const newImageSrc = `data:image/png;base64,${extractedBase64}`;
-                    setGeneratedImage(newImageSrc);
-                    setLiveRegionText(t('imageGeneratedSuccess'));
-                } else {
-                    console.log("API döndü:", content.substring(0, 100));
-                    throw { message: t('noImageError'), type: 'noImage' };
-                }
+            if (imageUrl) {
+                setGeneratedImage(imageUrl);
+                setLiveRegionText(t('imageGeneratedSuccess'));
+            } else if (result.data?.[0]?.b64_json) {
+                const base64Image = result.data[0].b64_json;
+                const newImageSrc = `data:image/png;base64,${base64Image}`;
+                setGeneratedImage(newImageSrc);
+                setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
                 console.error("Yanıt formatı beklenmedik:", result);
                 throw { message: t('invalidResponseError'), type: 'generic' };
