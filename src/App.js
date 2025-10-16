@@ -59,7 +59,7 @@ const translations = {
     shareTextWithStory: "\"{prompt}\" (Generated image). Visit www.kutuphaneveteknoloji.com to create your own AI image and story for the festival. #ktf #kutuphaneveteknolojifest\n\nHere is my story:\n{story}",
     canvasLine1: "I'm at the 3rd Int'l Library & Technology Festival, as {prompt}!",
     canvasLine2: "Create your own AI image for the festival at www.kutuphaneveteknoloji.com",
-    imagePrompt: `Create an artistic portrait of a character inspired by {prompt}. The character should have a library and technology theme in the background. Style: digital art, fantasy, non-photorealistic. The character embodies the essence of a book character at a cultural festival.`,
+    imagePrompt: `Create an artistic portrait of a character inspired by {prompt}. The character should be in a library with technology elements like glowing books, floating data streams, digital displays. Style: digital fantasy art, vibrant, non-photorealistic, highly detailed.`,
     storyPrompt: `You are a creative storyteller. Using the festival information I will provide, write a short (max 3 paragraphs), captivating story in English about the character from the generated image, based on the user's original prompt: '{prompt}'. The story should take place at the 3rd International Library and Technology Festival. The story must be consistent with the festival's main theme of "Producing Libraries", the atmosphere of the image, and the character's mood. Here's what you need to know about the festival: {festivalInfo}`,
     samplePrompts: ["Mysterious and clever like Sherlock Holmes", "A dystopian character from the novel 1984", "Captain Ahab from Moby Dick", "Adventurous like Don Quixote", "A Ghibli film character", "Romantic like Jane Eyre", "A Cyberpunk character", "Curious like Alice in Wonderland", "A Fremen from the Dune universe", "A Steampunk inventor", "Noble and wise like an elf", "Conflicted like Raskolnikov", "Thoughtful like The Little Prince"],
   },
@@ -119,22 +119,16 @@ const translations = {
     shareTextWithStory: "\"{prompt}\" (Oluşturulan görsel). Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz. #ktf #kutuphaneveteknolojifest\n\nİşte benim hikayem:\n{story}",
     canvasLine1: "Ben de 3. Uluslararası Kütüphane ve Teknoloji Festivali'ndeyim. Hem de {prompt} olarak!",
     canvasLine2: "Festival kapsamında kendi yapay zeka görselinizi oluşturmak için www.kutuphaneveteknoloji.com adresini ziyaret edebilirsiniz.",
-    imagePrompt: `{prompt} karakterinden ilham alarak sanatsal bir portre oluştur. Karakter kütüphane ve teknoloji temasını yansıtmalı. Stil: dijital sanat, fantezi, fotogerçekçi olmayan. Karakter kültür festivalinde kitap karakterinin özünü yansıtmalı.`,
+    imagePrompt: `{prompt} karakterinin sanatsal portresi. Kütüphane ve teknoloji öğeleri olan ortamda. Stil: dijital fantezi sanat, canlı, fotogerçekçi olmayan, çok detaylı.`,
     storyPrompt: `Yaratıcı bir hikaye anlatıcısısın. Sana vereceğim festival bilgilerini kullanarak, kullanıcının orijinal istemi olan '{prompt}' ve bu istemle oluşturulan görseldeki karakterden yola çıkarak, bu karakterin 3. Uluslararası Kütüphane ve Teknoloji Festivali'nde geçen kısa (en fazla 3 paragraflık), büyüleyici ve Türkçe bir hikayesini yaz. Hikaye, festivalin "Üreten Kütüphaneler" ana temasıyla, görseldeki atmosferle ve karakterin ruh haliyle uyumlu olsun. İşte festivalle ilgili bilmen gerekenler: {festivalInfo}`,
     samplePrompts: ["Sherlock Holmes gibi gizemli ve zeki", "1984 romanından distopik bir karakter", "Moby Dick'ten Kaptan Ahab", "Don Quixote gibi maceraperest", "Bir Ghibli film karakteri", "Jane Eyre gibi romantik", "Cyberpunk bir karakter", "Alice Harikalar Diyarında gibi meraklı", "Dune evreninden bir Fremen", "Steampunk bir mucit", "Bir elf gibi asil ve bilge", "Raskolnikov gibi çatışmalı", "Küçük Prens gibi düşünceli"],
   }
 };
 
-
-// --- Global Stil ve Yardımcı Fonksiyonlar ---
-
 const GlobalStyles = () => (
     <style>{`
         :root { --safe-top: env(safe-area-inset-top, 0px); }
         .section { scroll-margin-top: calc(84px + var(--safe-top)); }
-        @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto !important; }
-        }
         .loading-container-interactive { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; width: 100%; height: 100%; }
         .spinner {
             width: 64px;
@@ -144,10 +138,7 @@ const GlobalStyles = () => (
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         video { transform: scaleX(-1); }
     `}</style>
 );
@@ -155,9 +146,6 @@ const GlobalStyles = () => (
 const getScrollBehavior = () => {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 };
-
-
-// --- Bileşenler ---
 
 const Header = ({ t, toggleLanguage }) => (
     <header className="w-full text-center p-4 md:p-6 bg-white/10 backdrop-blur-md rounded-b-2xl shadow-lg border-b border-white/20 relative">
@@ -220,7 +208,6 @@ const CameraView = ({ onCapture, imageSrc, t }) => {
                     const MAX_HEIGHT = 720;
                     let width = img.width;
                     let height = img.height;
-
                     if (width > height) {
                         if (width > MAX_WIDTH) {
                             height = Math.round(height * (MAX_WIDTH / width));
@@ -258,11 +245,11 @@ const CameraView = ({ onCapture, imageSrc, t }) => {
         <div id="cameraSection" className="section w-full p-4 border-2 border-dashed border-[#241bc6]/50 rounded-2xl bg-black/20 flex flex-col items-center gap-4">
             <h2 tabIndex="-1" className="text-xl font-bold text-center">{t('step1Title')}</h2>
             <div className="w-full aspect-[9/16] md:aspect-video bg-black rounded-lg overflow-hidden relative">
-                {imageSrc ? <img src={imageSrc} alt="Seçilen Fotoğraf" className="w-full h-full object-contain" /> : (<> <video ref={videoRef} autoPlay playsInline className={`w-full h-full object-cover ${!stream ? 'hidden' : ''}`}></video> {!stream && <div className="absolute inset-0 flex items-center justify-center text-gray-400">{t('cameraOff')}</div>} </>)}
+                {imageSrc ? <img src={imageSrc} alt="Seçilen Fotoğraf" className="w-full h-full object-contain" /> : (<><video ref={videoRef} autoPlay playsInline className={`w-full h-full object-cover ${!stream ? 'hidden' : ''}`}></video>{!stream && <div className="absolute inset-0 flex items-center justify-center text-gray-400">{t('cameraOff')}</div>}</>)}
             </div>
             {cameraError && <div className="w-full p-3 my-2 bg-red-500/20 text-red-300 rounded-lg text-center text-sm flex items-center justify-center gap-2"><AlertTriangle size={20} /><span>{cameraError}</span></div>}
             <div className="flex flex-col sm:flex-row gap-4">
-                {imageSrc ? (<button onClick={handleRetake} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#bf24c6] text-white rounded-lg hover:bg-[#d435d1] transition-all transform hover:scale-105"><RefreshCw size={20} />{t('retake')}</button>) : (<> {!stream ? (<button onClick={startCamera} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#241bc6] text-white rounded-lg hover:bg-[#3a32d1] transition-all transform hover:scale-105"><Camera size={20} />{t('openCamera')}</button>) : (<button onClick={captureImage} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#bf24c6] text-white rounded-lg hover:bg-[#d435d1] transition-all transform hover:scale-105"><Zap size={20} />{t('takePhoto')}</button>)} <button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all transform hover:scale-105"><Upload size={20} />{t('uploadPhoto')}</button> </>)}
+                {imageSrc ? (<button onClick={handleRetake} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#bf24c6] text-white rounded-lg hover:bg-[#d435d1] transition-all transform hover:scale-105"><RefreshCw size={20} />{t('retake')}</button>) : (<>{!stream ? (<button onClick={startCamera} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#241bc6] text-white rounded-lg hover:bg-[#3a32d1] transition-all transform hover:scale-105"><Camera size={20} />{t('openCamera')}</button>) : (<button onClick={captureImage} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#bf24c6] text-white rounded-lg hover:bg-[#d435d1] transition-all transform hover:scale-105"><Zap size={20} />{t('takePhoto')}</button>)}<button onClick={() => fileInputRef.current.click()} className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all transform hover:scale-105"><Upload size={20} />{t('uploadPhoto')}</button></>)}
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept="image/jpeg, image/png" className="hidden" />
             <p className="text-center text-xs text-gray-400 mt-2 max-w-md">{t('photoTip')}</p>
@@ -303,25 +290,6 @@ const PromptControls = React.forwardRef(({ onGenerate, imageSrc, t, language }, 
 
 const Toast = ({ message, type, onClose }) => { useEffect(() => { const timer = setTimeout(() => { onClose(); }, 3000); return () => clearTimeout(timer); }, [onClose]); const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600'; return (<div className={`fixed bottom-5 right-5 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50`}>{message}</div>); };
 
-const ShareModal = ({ shareText, onClose, onCopy, story, onCopyStoryShare, t }) => {
-    const pageUrl = "https://www.kutuphaneveteknoloji.com/";
-    const socialLinks = [ { name: "X", url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}` }, { name: "Facebook", url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}&quote=${encodeURIComponent(shareText)}` }, { name: "LinkedIn", url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}` }, { name: "WhatsApp", url: `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + pageUrl)}` }, { name: "Telegram", url: `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(shareText)}` }, ];
-    return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-40" onClick={onClose}>
-            <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
-                <h3 className="text-xl font-bold mb-4 text-center">{t('shareModalTitle')}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                    {socialLinks.map(link => (<a href={link.url} target="_blank" rel="noopener noreferrer" key={link.name} className="bg-gray-700 hover:bg-gray-600 text-white text-center py-3 rounded-lg transition-colors">{link.name}</a>))}
-                </div>
-                <div className="mt-4 p-3 bg-gray-900 rounded-lg text-sm text-gray-300 text-center"><strong>Instagram:</strong> {t('instagramTip')}</div>
-                <button onClick={onCopy} className="mt-4 w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg transition-colors">{t('copyImageShareText')}</button>
-                {story && (<button onClick={onCopyStoryShare} className="mt-2 w-full bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-lg transition-colors">{t('copyStoryShareText')}</button>)}
-                <button onClick={onClose} className="mt-2 w-full text-gray-400 hover:text-white py-2">{t('close')}</button>
-            </div>
-        </div>
-    );
-};
-
 const LoadingAnimation = ({ t, language, step }) => {
     const [loadingText, setLoadingText] = useState('');
 
@@ -331,13 +299,11 @@ const LoadingAnimation = ({ t, language, step }) => {
         const loadingMessages = translations[language][messagesKey];
         
         setLoadingText(initialText);
-
         let index = 0;
         const intervalId = setInterval(() => {
             setLoadingText(loadingMessages[index]);
             index = (index + 1) % loadingMessages.length;
         }, 2500);
-
         return () => clearInterval(intervalId);
     }, [language, t, step]);
 
@@ -354,7 +320,6 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
     const downloadButtonRef = useRef(null);
     const errorRef = useRef(null);
     const [toast, setToast] = useState(null);
-    const [showShareModal, setShowShareModal] = useState(false);
     
     useEffect(() => { if (generatedImage && !isLoading && downloadButtonRef.current) { setTimeout(() => downloadButtonRef.current.focus({ preventScroll: true }), 100); } }, [generatedImage, isLoading]);
     useEffect(() => { if (error && errorRef.current) { setTimeout(() => errorRef.current.focus({ preventScroll: true }), 100); } }, [error]);
@@ -366,38 +331,6 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
         }
     }
 
-    const drawTextAndBackground = (ctx, text, yPos, canvas, options = {}) => {
-        const { width } = canvas; const { customFontSize = null } = options; const padding = width * 0.05; const maxWidth = width - (padding * 2); let fontSize; if (customFontSize) { fontSize = customFontSize; } else { fontSize = Math.max(16, Math.min(30, Math.round(width / 35))); } const lineHeight = fontSize * 1.3; ctx.font = `bold ${fontSize}px "Inter", Arial, sans-serif`; ctx.textAlign = 'center'; const x = width / 2; const words = text.split(' '); let line = ''; const lines = []; for (const word of words) { const testLine = line + word + ' '; if (ctx.measureText(testLine).width > maxWidth && line.length > 0) { lines.push(line.trim()); line = word + ' '; } else { line = testLine; } } lines.push(line.trim()); const textBlockHeight = lines.length * lineHeight; const verticalPadding = lineHeight * 0.3; const rectHeight = textBlockHeight + (verticalPadding * 2); const rectY = yPos - rectHeight; const startY = rectY + verticalPadding; ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0, rectY, width, rectHeight); ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 4; ctx.textBaseline = 'top'; lines.forEach((l, index) => { const currentY = startY + (index * lineHeight); ctx.strokeText(l, x, currentY); ctx.fillText(l, x, currentY); }); const gap = 15; return rectHeight + gap;
-    };
-    
-    useEffect(() => {
-         if (generatedImage && !isLoading && canvasRef.current) { 
-             const canvas = canvasRef.current; const ctx = canvas.getContext('2d'); const img = new Image(); img.src = generatedImage; 
-             img.onload = () => { 
-                canvas.width = img.width; canvas.height = img.height; ctx.drawImage(img, 0, 0); 
-                const overlayTexts = { line1: t('canvasLine1', { prompt: userPrompt }), line2: t('canvasLine2') }; 
-                const bottomMargin = canvas.height * 0.05; const smallerFontSize = Math.max(10, Math.round(canvas.width / 55)); 
-                const block2Height = drawTextAndBackground(ctx, overlayTexts.line2, canvas.height - bottomMargin, canvas, { customFontSize: smallerFontSize });
-                drawTextAndBackground(ctx, overlayTexts.line1, canvas.height - bottomMargin - block2Height, canvas, {});
-             }; 
-        }
-    }, [generatedImage, isLoading, userPrompt, t]);
-    
-    const handleShare = async () => {
-        if (!canvasRef.current) return;
-        const shareText = t('shareText', { prompt: userPrompt });
-        const title = t('appTitle');
-        try {
-            const blob = await new Promise(resolve => canvasRef.current.toBlob(resolve, 'image/png'));
-            const file = new File([blob], 'ktf-studyosu-gorsel.png', { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: title, text: shareText, });
-            } else { throw new Error("Cannot share files on this browser."); }
-        } catch (error) {
-            console.warn("Web Share API failed or not supported, falling back to modal:", error);
-            setShowShareModal(true);
-        }
-    };
-    
     const copyToClipboard = (textToCopy) => {
         const textArea = document.createElement("textarea"); textArea.value = textToCopy; textArea.style.position = "fixed"; textArea.style.top = "-9999px"; textArea.style.left = "-9999px"; document.body.appendChild(textArea); textArea.focus(); textArea.select();
         try { if (document.execCommand('copy')) { setToast({ message: t('textCopied'), type: 'success' }); return true; } return false;
@@ -405,21 +338,18 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
         } finally { document.body.removeChild(textArea); }
     };
     
-    const handleCopyToClipboard = () => { copyToClipboard(t('shareText', { prompt: userPrompt })); };
-    const handleCopyStory = () => { if (story) { copyToClipboard(story); } };
-    const handleCopyStoryShareText = () => { copyToClipboard(t('shareTextWithStory', { prompt: userPrompt, story: story })); };
     const downloadImage = () => { if (canvasRef.current) { const link = document.createElement('a'); link.href = canvasRef.current.toDataURL('image/png'); link.download = 'ktf-studyosu-gorsel.png'; document.body.appendChild(link); link.click(); document.body.removeChild(link); } };
 
     return (
         <div id="resultSection" className="section w-full p-4 border-2 border-dashed border-[#bf24c6]/50 rounded-2xl bg-black/20 flex flex-col items-center justify-center min-h-[400px]">
             <h2 tabIndex="-1" className="text-xl font-bold text-center mb-4">{t('step3Title')}</h2>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            {showShareModal && <ShareModal shareText={t('shareText', { prompt: userPrompt })} onClose={() => setShowShareModal(false)} onCopy={handleCopyToClipboard} story={story} onCopyStoryShare={handleCopyStoryShareText} t={t} />}
             <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative flex items-center justify-center">
                 {isLoading && <LoadingAnimation t={t} language={language} step={generationStep} />}
                 {error && (<div ref={errorRef} tabIndex="-1" role="alert" className="flex flex-col items-center gap-4 text-red-400 p-4">
                     <AlertTriangle size={48} />
                     <p className="text-center font-bold">{error.message}</p>
+                    <p className="text-center text-sm text-gray-400">API Response: {error.details}</p>
                     {error.type === 'noImage' && (
                         <>
                             <p className="text-center text-sm text-gray-300 mt-2 bg-black/20 p-3 rounded-lg">{t('photoTip')}</p>
@@ -429,32 +359,20 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
                         </>
                     )}
                 </div>)}
-                {generatedImage && !isLoading && (<canvas ref={canvasRef} className="w-full h-full object-contain" />)}
+                {generatedImage && !isLoading && (<img src={generatedImage} alt="Generated Portrait" className="w-full h-full object-contain" />)}
                 {!isLoading && !error && !generatedImage && (<div className="text-gray-400 text-center"><p>{t('resultPlaceholder')}</p></div>)}
             </div>
              {generatedImage && !isLoading && (
                 <div className="mt-4 flex flex-col items-center gap-4 w-full">
                     <div className="flex flex-wrap justify-center gap-4">
                         <button ref={downloadButtonRef} onClick={downloadImage} className="flex items-center justify-center gap-2 px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-all transform hover:scale-105"><Download size={20} /> {t('downloadImage')}</button>
-                        <button onClick={handleShare} aria-label={t('shareOnSocial')} className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-all transform hover:scale-105"><Share2 size={20} /> {t('shareOnSocial')}</button>
                     </div>
 
                     <div className="flex flex-col items-center gap-2 w-full max-w-md">
-                        <button onClick={handleCopyToClipboard} className="w-full flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity transform hover:scale-105">
+                        <button onClick={() => copyToClipboard(t('shareText', { prompt: userPrompt }))} className="w-full flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity transform hover:scale-105">
                             <Copy size={20}/> {t('copyImageShareText')}
                         </button>
-                        {story && !isStoryLoading && (
-                             <button onClick={handleCopyStoryShareText} className="w-full flex items-center justify-center gap-2 px-6 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity transform hover:scale-105">
-                                <Copy size={20}/> {t('copyStoryShareText')}
-                            </button>
-                        )}
                     </div>
-
-                    {isStoryLoading && (
-                         <div className="mt-4 p-4 w-full max-w-lg flex flex-col items-center justify-center">
-                            <LoadingAnimation t={t} language={language} step="story" />
-                        </div>
-                    )}
 
                     {!story && !isStoryLoading && !error && (
                         <div className="mt-6 flex flex-col items-center gap-3 text-center p-4 bg-black/20 rounded-lg w-full max-w-lg">
@@ -465,11 +383,17 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
                         </div>
                     )}
 
+                    {isStoryLoading && (
+                         <div className="mt-4 p-4 w-full max-w-lg flex flex-col items-center justify-center">
+                            <LoadingAnimation t={t} language={language} step="story" />
+                        </div>
+                    )}
+
                     {story && !isStoryLoading && (
-                        <div className="mt-4 p-4 bg-black/30 rounded-lg w-full max-w-lg prose prose-invert prose-p:text-gray-300 relative">
+                        <div className="mt-4 p-4 bg-black/30 rounded-lg w-full max-w-lg relative">
                             <h4 className="font-bold text-lg text-white mb-2">{t('yourStory')}</h4>
-                            <p className="text-sm whitespace-pre-wrap">{story}</p>
-                            <button onClick={handleCopyStory} className="absolute top-2 right-2 p-1.5 bg-gray-700/50 hover:bg-gray-600 rounded-md text-gray-300 hover:text-white transition-colors" aria-label={t('copyStory')}>
+                            <p className="text-sm text-gray-300 whitespace-pre-wrap">{story}</p>
+                            <button onClick={() => copyToClipboard(story)} className="absolute top-2 right-2 p-1.5 bg-gray-700/50 hover:bg-gray-600 rounded-md text-gray-300 hover:text-white transition-colors" aria-label={t('copyStory')}>
                                 <Copy size={16} />
                             </button>
                         </div>
@@ -480,8 +404,6 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
     );
 };
 
-
-// --- Ana Uygulama ---
 export default function App() {
     const [imageSrc, setImageSrc] = useState(null);
     const [generatedImage, setGeneratedImage] = useState(null);
@@ -489,7 +411,6 @@ export default function App() {
     const [isStoryLoading, setIsStoryLoading] = useState(false);
     const [error, setError] = useState(null);
     const [userPrompt, setUserPrompt] = useState("");
-    const [isMobile, setIsMobile] = useState(false);
     const [liveRegionText, setLiveRegionText] = useState("");
     const [story, setStory] = useState("");
     const [language, setLanguage] = useState('tr');
@@ -503,18 +424,13 @@ export default function App() {
 
     const toggleLanguage = () => { setLanguage(prevLang => prevLang === 'tr' ? 'en' : 'tr'); };
 
-    const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
-        if (!imageForStory || !promptForStory) return;
+    const handleGenerateStory = useCallback(async (promptForStory) => {
+        if (!promptForStory) return;
 
         const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY;
         const apiUrl = `https://openrouter.ai/api/v1/chat/completions`;
-        const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi'nde "Üreten Kütüphaneler" ana temasıyla gerçekleştirilecektir. Festival, teknoloji ve yapay zekâ temelli hizmetler üretenleri, girişimcileri, akademisyenleri ve binlerce genci bir araya getirir. "Üreten kütüphane" kavramı, kütüphaneleri bireylerin sosyal, kültürel ve teknolojik gelişimlerini destekleyen dinamik üretim merkezleri hâline getirmeyi hedefler.`;
+        const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi'nde "Üreten Kütüphaneler" ana temasıyla gerçekleştirilecektir.`;
         const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
-        const payload = {
-            model: 'google/gemini-2.5-flash-preview-09-2025',
-            messages: [{ role: 'user', content: storyPrompt }],
-            max_tokens: 1000
-        };
         
         try {
             const response = await fetch(apiUrl, { 
@@ -523,13 +439,19 @@ export default function App() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 }, 
-                body: JSON.stringify(payload) 
+                body: JSON.stringify({
+                    model: 'google/gemini-2.5-flash-preview-09-2025',
+                    messages: [{ role: 'user', content: storyPrompt }],
+                    max_tokens: 1000
+                })
             });
-            if (!response.ok) { 
+            
+            if (!response.ok) {
                 const errorData = await response.json(); 
-                console.error("Hikaye oluşturma API hatası:", errorData); 
+                console.error("Story API error:", errorData); 
                 throw new Error(t('storyGenerationError')); 
             }
+            
             const result = await response.json(); 
             const storyText = result.choices?.[0]?.message?.content;
             if (storyText) { 
@@ -539,9 +461,7 @@ export default function App() {
             }
         } catch (err) {
             console.error(err);
-            setError({ message: err.message || t('storyGenerationError'), type: 'generic' });
-            setLiveRegionText(`${t('errorPrefix')}${err.message}`);
-            throw err; 
+            setError({ message: err.message || t('storyGenerationError'), type: 'generic', details: err.toString() });
         }
     }, [t]);
 
@@ -556,32 +476,16 @@ export default function App() {
         setError(null);
 
         try {
-            await handleGenerateStory(userPrompt, generatedImage);
+            await handleGenerateStory(userPrompt);
         } catch (e) {
-            // error is set inside handleGenerateStory
+            console.error(e);
         } finally {
             setIsStoryLoading(false);
         }
     };
 
-    useEffect(() => {
-        const checkIsMobile = () => { setIsMobile(matchMedia("(pointer: coarse)").matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)); };
-        checkIsMobile(); window.addEventListener('resize', checkIsMobile);
-        return () => window.removeEventListener('resize', checkIsMobile);
-    }, []);
-
     const handleCapture = (dataUrl) => {
         setImageSrc(dataUrl); setGeneratedImage(null); setError(null); setStory("");
-        if (isMobile && dataUrl && promptInputRef.current) {
-             const promptSection = document.getElementById('characterInputSection');
-            if (promptSection) {
-                setLiveRegionText(t('photoTip'));
-                setTimeout(() => {
-                    promptSection.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' });
-                    setTimeout(() => { promptInputRef.current.focus({ preventScroll: true }); }, 400); 
-                }, 100);
-            }
-        }
     };
     
     const handleGenerateImage = async (mode, prompt) => {
@@ -599,54 +503,42 @@ export default function App() {
         setStory("");
         
         const apiKey = process.env.REACT_APP_OPENROUTER_API_KEY;
-        const apiUrl = `https://openrouter.ai/api/v1/images/generations`;
         const fullPrompt = t('imagePrompt', { prompt });
         
-        const payload = {
-            model: 'stability.ai/stable-diffusion-3-large',
-            prompt: fullPrompt,
-            num_images: 1,
-            width: 1024,
-            height: 1024,
-            steps: 40
-        };
-        
         try {
-            const response = await fetch(apiUrl, { 
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', { 
                 method: 'POST', 
                 headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 }, 
-                body: JSON.stringify(payload) 
+                body: JSON.stringify({
+                    model: 'openai/dall-e-3',
+                    messages: [{ role: 'user', content: fullPrompt }],
+                    max_tokens: 1024
+                })
             });
             
             if (!response.ok) { 
-                const errorData = await response.json(); 
-                console.error("API Hatası:", errorData); 
-                throw { message: t('imageGenerationError'), type: 'generic' }; 
+                const errorText = await response.text();
+                console.error("API Error Response:", errorText);
+                throw { message: t('imageGenerationError'), type: 'generic', details: errorText }; 
             }
             
             const result = await response.json();
-            const imageUrl = result.data?.[0]?.url;
+            const content = result.choices?.[0]?.message?.content;
             
-            if (imageUrl) {
-                setGeneratedImage(imageUrl);
-                setLiveRegionText(t('imageGeneratedSuccess'));
-            } else if (result.data?.[0]?.b64_json) {
-                const base64Image = result.data[0].b64_json;
-                const newImageSrc = `data:image/png;base64,${base64Image}`;
-                setGeneratedImage(newImageSrc);
+            if (content && typeof content === 'string' && content.includes('http')) {
+                setGeneratedImage(content);
                 setLiveRegionText(t('imageGeneratedSuccess'));
             } else {
-                console.error("Yanıt formatı beklenmedik:", result);
-                throw { message: t('invalidResponseError'), type: 'generic' };
+                console.log("API Response:", content);
+                throw { message: t('imageGenerationError'), type: 'generic', details: content || 'No image URL returned' };
             }
         } catch (err) {
-            console.error(err);
+            console.error('Image generation error:', err);
             const errorMessage = err.message || t('imageGenerationError');
-            const errorType = err.type || 'generic';
-            setError({ message: errorMessage, type: errorType });
+            setError({ message: errorMessage, type: 'generic', details: err.details || err.toString() });
             setLiveRegionText(`${t('errorPrefix')}${errorMessage}`);
         } finally {
             setIsLoading(false);
