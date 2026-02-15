@@ -689,7 +689,9 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
 
     useEffect(() => {
          if (generatedImage && !isLoading && canvasRef.current) { 
-             const canvas = canvasRef.current; const ctx = canvas.getContext('2d'); const img = new Image(); img.src = generatedImage; 
+             const canvas = canvasRef.current; const ctx = canvas.getContext('2d'); const img = new Image(); 
+             img.crossOrigin = "Anonymous"; // Ensure crossOrigin is set for external URLs
+             img.src = generatedImage; 
              img.onload = async () => { 
                 // Use shared helper for consistency
                 await drawWatermarkOnCanvas(canvas, ctx, img, userPrompt, t);
@@ -814,9 +816,9 @@ export default function App() {
     const [generationStep, setGenerationStep] = useState(null);
     const [gallery, setGallery] = useState([]);
     const promptInputRef = useRef(null);
-
-    // API Key from user
-    const OPENROUTER_API_KEY = "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";
+    
+    // --- API Configuration ---
+    const OPENROUTER_API_KEY = "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";
 
     // Load gallery on mount
     useEffect(() => { 
@@ -907,37 +909,32 @@ export default function App() {
     const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
         if (!imageForStory || !promptForStory) return;
         
-        // OpenRouter API URL and Headers
         const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
         const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir.`;
-        const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
+        const storyPromptText = t('storyPrompt', { prompt: promptForStory, festivalInfo });
         
         const payload = {
-            "model": "google/gemini-2.0-flash-lite-preview-02-05:free", // Mapped from 'gemini-2.5-flash-preview-05-20'
-            "messages": [
-                {
-                    "role": "user",
-                    "content": storyPrompt
-                }
+            model: "google/gemini-2.0-flash-001", // Using standard flash for text
+            messages: [
+                { role: "user", content: storyPromptText }
             ]
         };
         
         try {
-            const response = await fetch(apiUrl, { 
-                method: 'POST', 
-                headers: { 
-                    'Content-Type': 'application/json',
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
                     'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': 'https://kutuphaneveteknoloji.com',
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com', // OpenRouter required headers
                     'X-Title': 'KTF Studio'
-                }, 
-                body: JSON.stringify(payload) 
+                },
+                body: JSON.stringify(payload)
             });
 
             if (!response.ok) { throw new Error(t('storyGenerationError')); }
             
-            const result = await response.json(); 
-            // Parsing standard OpenAI-style response from OpenRouter
+            const result = await response.json();
             const storyText = result.choices?.[0]?.message?.content;
             
             if (storyText) { setStory(storyText); } else { throw new Error(t('invalidResponseError')); }
@@ -971,70 +968,63 @@ export default function App() {
         setLiveRegionText(t('loadingImage')); setUserPrompt(prompt); setIsLoading(true); setGenerationStep('image'); setError(null); setGeneratedImage(null); setStory("");
         
         const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
-        const base64ImageData = imageSrc.split(',')[1];
         const fullPrompt = t('imagePrompt', { prompt });
         
         const payload = {
-            "model": "google/gemini-2.0-pro-exp-02-05:free", // Using a multimodal model for input. Note: OpenRouter LLMs output text, not direct image bytes usually.
-            "messages": [
+            model: "google/gemini-2.5-flash-image-preview",
+            messages: [
                 {
-                    "role": "user",
-                    "content": [
-                        { "type": "text", "text": fullPrompt },
-                        { "type": "image_url", "image_url": { "url": `data:image/jpeg;base64,${base64ImageData}` } }
+                    role: "user",
+                    content: [
+                        { type: "text", text: fullPrompt },
+                        { type: "image_url", image_url: { url: imageSrc } } // OpenRouter expects standard OpenAI image_url structure
                     ]
                 }
             ]
         };
         
         try {
-            const response = await fetch(apiUrl, { 
-                method: 'POST', 
-                headers: { 
-                    'Content-Type': 'application/json',
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
                     'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': 'https://kutuphaneveteknoloji.com',
+                    'Content-Type': 'application/json',
+                    'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com',
                     'X-Title': 'KTF Studio'
-                }, 
-                body: JSON.stringify(payload) 
+                },
+                body: JSON.stringify(payload)
             });
 
             if (!response.ok) { throw new Error(t('imageGenerationError')); }
             
-            const result = await response.json(); 
-            const choice = result?.choices?.[0];
+            const result = await response.json();
+            const content = result.choices?.[0]?.message?.content;
             
-            // Check if response contains image URL or data in text (OpenRouter specific behavior handling)
-            // Note: Standard Gemini Flash via OpenRouter returns text description. 
-            // If the model generates an image link (unlikely for pure LLM), we try to capture it.
-            // For the purpose of this demo request, we check for content.
-            
-            // Since we are using an LLM endpoint, we might not get a base64 image back directly like the Google Native API.
-            // If the user is using a specific model that supports image gen, the output might be a URL.
-            // Here we just handle the text response as a placeholder if it's not an image, or use the original if passed through.
-            
-            // NOTE: If using a pure LLM (Gemini 2.0 Flash), this will return a text description of the image generation request.
-            // To prevent app crash, we check if content is base64-like or URL.
-            
-            const content = choice?.message?.content;
-            
-            if (content && (content.startsWith('http') || content.startsWith('data:image'))) {
-                 // Assume it returned a URL or Data URI
-                 setGeneratedImage(content);
-                 setLiveRegionText(t('imageGeneratedSuccess'));
-                 addToGallery(content, prompt);
-            } else if (content) {
-                // If it returns text (which is likely for Gemini via OpenRouter Chat API), 
-                // we treat it as an error for the *Image Generation* context, or we could display the text.
-                // For this app, we need an image.
-                console.warn("OpenRouter returned text:", content);
-                // Fallback/Warning: Since we switched to OpenRouter LLM, we might not get an image. 
-                // However, to keep the app flow "working" in a demo sense if the model REFUSES to generate image:
-                throw new Error("Model returned text instead of image. OpenRouter LLMs may not support direct image generation.");
-            } else {
-                throw new Error(t('invalidResponseError'));
-            }
+            if (!content) throw new Error(t('invalidResponseError'));
 
+            // Extract image URL from markdown if present (OpenRouter standard for some models) or check if content is a raw URL
+            // Pattern 1: ![Alt](url)
+            const markdownMatch = content.match(/!\[.*?\]\((.*?)\)/);
+            let finalImageSrc = null;
+
+            if (markdownMatch && markdownMatch[1]) {
+                finalImageSrc = markdownMatch[1];
+            } else if (content.startsWith('http')) {
+                finalImageSrc = content.trim(); // Assume raw URL
+            } else if (content.startsWith('data:image')) {
+                finalImageSrc = content.trim(); // Assume base64
+            }
+            
+            // If the model replies with text refusing to generate, we might not get a URL.
+            // Check for common refusal patterns if no image found is skipped, but essential to catch errors.
+
+            if (finalImageSrc) {
+                setGeneratedImage(finalImageSrc); setLiveRegionText(t('imageGeneratedSuccess'));
+                addToGallery(finalImageSrc, prompt);
+            } else { 
+                console.error("Unexpected response content:", content);
+                throw new Error(t('invalidResponseError')); 
+            }
         } catch (err) { setError(err.message); setLiveRegionText(`${t('errorPrefix')}${err.message}`); } finally { setIsLoading(false); setGenerationStep(null); }
     };
 
