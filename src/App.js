@@ -689,9 +689,7 @@ const ImageOutput = ({ generatedImage, isLoading, isStoryLoading, onGenerateStor
 
     useEffect(() => {
          if (generatedImage && !isLoading && canvasRef.current) { 
-             const canvas = canvasRef.current; const ctx = canvas.getContext('2d'); const img = new Image(); 
-             img.crossOrigin = "Anonymous"; // Ensure crossOrigin is set for external URLs
-             img.src = generatedImage; 
+             const canvas = canvasRef.current; const ctx = canvas.getContext('2d'); const img = new Image(); img.src = generatedImage; 
              img.onload = async () => { 
                 // Use shared helper for consistency
                 await drawWatermarkOnCanvas(canvas, ctx, img, userPrompt, t);
@@ -816,9 +814,6 @@ export default function App() {
     const [generationStep, setGenerationStep] = useState(null);
     const [gallery, setGallery] = useState([]);
     const promptInputRef = useRef(null);
-    
-    // --- API Configuration ---
-    const OPENROUTER_API_KEY = "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";
 
     // Load gallery on mount
     useEffect(() => { 
@@ -908,38 +903,19 @@ export default function App() {
 
     const handleGenerateStory = useCallback(async (promptForStory, imageForStory) => {
         if (!imageForStory || !promptForStory) return;
-        
-        const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         const festivalInfo = `3. Uluslararası Kütüphane ve Teknoloji Festivali, 30 Mart – 5 Nisan 2026 tarihleri arasında İstanbul Rami Kütüphanesi’nde “Üreten Kütüphaneler” ana temasıyla gerçekleştirilecektir.`;
-        const storyPromptText = t('storyPrompt', { prompt: promptForStory, festivalInfo });
-        
-        const payload = {
-            model: "google/gemini-2.0-flash-001", // Using standard flash for text
-            messages: [
-                { role: "user", content: storyPromptText }
-            ]
-        };
+        const storyPrompt = t('storyPrompt', { prompt: promptForStory, festivalInfo });
+        const payload = { contents: [{ parts: [{ text: storyPrompt }] }] };
         
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com', // OpenRouter required headers
-                    'X-Title': 'KTF Studio'
-                },
-                body: JSON.stringify(payload)
-            });
-
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if (!response.ok) { throw new Error(t('storyGenerationError')); }
-            
-            const result = await response.json();
-            const storyText = result.choices?.[0]?.message?.content;
-            
+            const result = await response.json(); const storyText = result.candidates?.[0]?.content?.parts?.[0]?.text;
             if (storyText) { setStory(storyText); } else { throw new Error(t('invalidResponseError')); }
         } catch (err) { setError(err.message); setLiveRegionText(`${t('errorPrefix')}${err.message}`); throw err; }
-    }, [t, OPENROUTER_API_KEY]);
+    }, [t]);
 
     const onGenerateStory = async () => {
         if (!generatedImage || !userPrompt) { setError(t('storyNeedsImageError')); return; }
@@ -967,64 +943,28 @@ export default function App() {
         if (resultSection) { resultSection.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' }); }
         setLiveRegionText(t('loadingImage')); setUserPrompt(prompt); setIsLoading(true); setGenerationStep('image'); setError(null); setGeneratedImage(null); setStory("");
         
-        const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+        const base64ImageData = imageSrc.split(',')[1];
         const fullPrompt = t('imagePrompt', { prompt });
-        
-        const payload = {
-            model: "google/gemini-2.5-flash-image-preview",
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        { type: "text", text: fullPrompt },
-                        { type: "image_url", image_url: { url: imageSrc } } // OpenRouter expects standard OpenAI image_url structure
-                    ]
-                }
-            ]
-        };
+        const payload = { contents: [{ parts: [ { text: fullPrompt }, { inlineData: { mimeType: "image/jpeg", data: base64ImageData } } ] }], generationConfig: { responseModalities: ['IMAGE'] }, };
         
         try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://www.kutuphaneveteknoloji.com',
-                    'X-Title': 'KTF Studio'
-                },
-                body: JSON.stringify(payload)
-            });
-
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             if (!response.ok) { throw new Error(t('imageGenerationError')); }
-            
-            const result = await response.json();
-            const content = result.choices?.[0]?.message?.content;
-            
-            if (!content) throw new Error(t('invalidResponseError'));
-
-            // Extract image URL from markdown if present (OpenRouter standard for some models) or check if content is a raw URL
-            // Pattern 1: ![Alt](url)
-            const markdownMatch = content.match(/!\[.*?\]\((.*?)\)/);
-            let finalImageSrc = null;
-
-            if (markdownMatch && markdownMatch[1]) {
-                finalImageSrc = markdownMatch[1];
-            } else if (content.startsWith('http')) {
-                finalImageSrc = content.trim(); // Assume raw URL
-            } else if (content.startsWith('data:image')) {
-                finalImageSrc = content.trim(); // Assume base64
+            const result = await response.json(); const candidate = result?.candidates?.[0]; const problematicFinishReasons = ['NO_IMAGE', 'SAFETY', 'IMAGE_OTHER', 'RECITATION'];
+            if (!candidate || problematicFinishReasons.includes(candidate.finishReason)) {
+                let userMessage = t('imageGenerationError');
+                if (candidate?.finishReason === 'SAFETY' || candidate?.finishReason === 'IMAGE_OTHER') userMessage = t('safetyError');
+                if (candidate?.finishReason === 'NO_IMAGE') userMessage = t('noImageError');
+                throw new Error(userMessage);
             }
-            
-            // If the model replies with text refusing to generate, we might not get a URL.
-            // Check for common refusal patterns if no image found is skipped, but essential to catch errors.
-
-            if (finalImageSrc) {
-                setGeneratedImage(finalImageSrc); setLiveRegionText(t('imageGeneratedSuccess'));
-                addToGallery(finalImageSrc, prompt);
-            } else { 
-                console.error("Unexpected response content:", content);
-                throw new Error(t('invalidResponseError')); 
-            }
+            const base64Data = candidate?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+            if (base64Data) {
+                const newImageSrc = `data:image/png;base64,${base64Data}`;
+                setGeneratedImage(newImageSrc); setLiveRegionText(t('imageGeneratedSuccess'));
+                addToGallery(newImageSrc, prompt);
+            } else { throw new Error(t('invalidResponseError')); }
         } catch (err) { setError(err.message); setLiveRegionText(`${t('errorPrefix')}${err.message}`); } finally { setIsLoading(false); setGenerationStep(null); }
     };
 
