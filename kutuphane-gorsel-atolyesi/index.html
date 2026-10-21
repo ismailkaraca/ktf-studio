@@ -45,7 +45,7 @@
         <div class="upload-help"><span class="dot dot-mint"></span><span>Yalnız kitap künyesi, ISBN, yer numarası ve raf konumu kullanılır. Üye verisi gerekli değildir.</span></div>
         <div class="mini-actions"><button type="button" class="text-button" id="demoButton">✦ Örnek Orhan Toker listesini aç</button><a href="/ornek-katalog.csv" download>Örnek CSV indir ↗</a></div>
         <div id="dataStatus" class="data-status">Örnek katalog yüklü: 5 farklı eser / 6 nüsha.</div>
-        <div id="books" class="book-picker"></div>
+        <div id="books" class="book-picker"></div><section class="cover-finder"><button class="btn btn-primary" id="searchCovers" type="button">🔎 ISBN ile gerçek kapakları bul ve yerleştir</button><p id="coverSearchStatus" role="status" class="cover-status">Kapaklar otomatik araştırılır. Kaynaklar kontrol edilerek orijinal resim dosyaları yerleştirilir.</p><ul id="coverResults" class="cover-results"></ul><p class="small-muted">Yalnız doğrulanmış, gerçekten indirilebilen kapak görselleri kullanılır. Bulunamayanlar nötr kalır; “＋ Kapak” ile manuel de eklenebilir.</p></section>
 
         <div class="section-divider"></div>
         <div class="panel-head"><div><small>ADIM 03</small><h2>Tasarımını seç</h2></div><span class="number-bubble">3</span></div>
@@ -66,7 +66,7 @@
               <div class="ai-method-label"><span class="ai-method-icon">✳</span><div><strong>Kendi ChatGPT hesabımla</strong><small>API anahtarı ya da stüdyo kodu gerektirmez</small></div></div>
               <p>Seçtiğin kitaplar ve tasarım şablonu için isteği biz hazırlıyoruz. <strong>ChatGPT önce ISBN numaralarıyla web araştırması yaparak gerçek kitap kapaklarını doğrulamalıdır.</strong> Doğrulanamayan veya görsel olarak kullanılamayan kapakların taklit edilmesi yasaktır.</p>
               <div class="ai-buttons"><button class="btn btn-primary" id="chatgptCaption" type="button">↗ ChatGPT'de metin oluştur</button><button class="btn btn-outline" id="chatgptVisual" type="button">↗ ChatGPT'de görsel oluştur</button></div>
-              <button class="text-button" id="copyChatgptPrompt" type="button">✎ Hazırlanan talimatı kopyala</button>
+              <button class="text-button" id="copyChatgptPrompt" type="button">✎ Hazırlanan talimatı kopyala</button><label class="field wide background-upload">🖼 ChatGPT görselini arka plan olarak yükle<input id="backgroundInput" type="file" accept="image/png,image/jpeg,image/webp"><small>Gerçek kapakları uygulama katman olarak yerleştirir; kapağın AI ile yeniden çizilmesine gerek yoktur.</small></label>
               <p class="small-muted">ChatGPT ayrı sekmede açılır; Gönder'e basmalısın. Web araması ve kapak görselinin gerçekten kullanılabilmesi ChatGPT araçlarına bağlıdır. Kapağın internette bulunması, üretilen resme birebir yerleştirildiği anlamına gelmez. Sonuç siteye otomatik aktarılmaz; bu bir OAuth entegrasyonu değildir.</p>
             </section>
             <details class="api-method"><summary>Yönetici API bağlantısıyla doğrudan uygulamada üret</summary>

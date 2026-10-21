@@ -25,3 +25,13 @@
 .api-method .field{margin:10px 0}
 .chatgpt-method .ai-buttons{margin-bottom:10px}
 @media(max-width:680px){.chatgpt-method{padding:13px}.chatgpt-method .ai-buttons{display:flex;flex-direction:column;gap:8px}.chatgpt-method .ai-buttons button{width:100%}}
+.p-book-cover img{object-fit:contain;background:#fff}
+.cover-finder{margin:14px 0;padding:15px;background:#f1f9ff;border:1px solid #cadceb;border-radius:14px}.cover-finder .btn{width:100%}
+.cover-status{font-size:13px;color:#385368;line-height:1.5;margin:10px 0}.cover-results{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cover-result{background:#fff;padding:8px;border-left:4px solid #d9a034;display:flex;gap:8px;flex-wrap:wrap;border-radius:7px;font-size:12px}
+.cover-result.found{border-left-color:#20987f}.cover-result small{font-size:11px;color:#435872}.cover-result a{font-size:11px;font-weight:800;margin-left:auto;text-decoration:underline}
+.background-upload{display:flex;flex-direction:column;gap:8px;padding:12px;background:#f1f7f6;border-radius:12px;margin:9px 0}.background-upload input{max-width:100%;font-size:12px}
+.multi-cover-comic .comic-panel{gap:8px;padding:14px 10px}.multi-cover-comic .comic-panel strong{font-size:22px}.multi-cover-comic .comic-emoji{font-size:69px}.multi-cover-comic .comic-bubble{font-size:20px}.multi-cover-comic .comic-panel p{font-size:16px}
+.comic-cover-row{display:flex;align-items:center;justify-content:center;gap:8px;max-width:100%}.comic-book-card{min-width:0;flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.multi-cover-comic .comic-book-card .p-book-cover{height:150px;width:96px;max-width:100%}.comic-book-name{font-size:13px;line-height:1.2;font-weight:800;min-height:31px}
+.comic-group-call{font-size:16px;border-radius:10px;padding:7px 10px;font-weight:900}
