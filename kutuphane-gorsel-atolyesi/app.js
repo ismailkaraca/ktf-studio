@@ -115,8 +115,15 @@ function chatgptOpen(kind){
  // ChatGPT web isteminin önceden doldurulması resmi OAuth oturumu veya doğrudan API çağrısı değildir.
  // Prompt parametresinin davranışı ChatGPT arayüzüne göre değişebilir; kopyalama yedeği verilir.
  const link='https://chatgpt.com/?prompt='+encodeURIComponent(prompt);
- const a=document.createElement('a');a.href=link;a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove();
- message("ChatGPT ayrı sekmede açıldı. Hazır metni kontrol edip Gönder'e basın. Görsel/metin ChatGPT içinde oluşur.");
+ // Çok kitaplı ve araştırma adımlı talimatlar URL limitini aşabilir.
+ // Bu durumda panoya kopyalayıp ChatGPT ana sayfasını açarız; uzun URL kullanmayız.
+ const tooLong=link.length>7000;
+ const copyTask=tooLong && navigator.clipboard?.writeText ? navigator.clipboard.writeText(prompt) : null;
+ const a=document.createElement('a');a.href=tooLong?'https://chatgpt.com/':link;a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove();
+ if(tooLong){
+   if(copyTask)copyTask.then(()=>message('Kapak araştırma talimatı panoya kopyalandı. ChatGPT sekmesine yapıştırıp Gönder\'e basın.'),()=>message('ChatGPT açıldı ancak kopyalama engellendi; aşağıdaki Talimatı Kopyala düğmesini kullanın.',true));
+   else message('ChatGPT açıldı. Tarayıcı kopyalamayı desteklemiyor; Talimatı Kopyala düğmesini kullanın.',true);
+ }else message("ChatGPT ayrı sekmede açıldı. Hazır metni kontrol edip Gönder'e basın. Görsel/metin ChatGPT içinde oluşur.");
 }
 async function chatgptCopy(){let prompt;try{prompt=chatgptPrompt('visual');}catch(e){message(e.message,true);return;}
  try{await navigator.clipboard.writeText(prompt);message('Görsel oluşturma talimatı kopyalandı. ChatGPT’ye yapıştırıp gönderebilirsiniz.');}
