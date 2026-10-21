@@ -6,7 +6,7 @@ const CURATED={
  '9786257463959': ['Oyunun sonu','Orhan Toker','https://orhantoker.com/kitaplar/dijital-dedektifler-2-oyunun-sonu','https://orhantoker.com/img-op/kitap-dijital-dedektifler-2-oyunun-sonu-640.webp'],
  '9786257463966': ['Sosyal maskara','Orhan Toker','https://orhantoker.com/kitaplar/dijital-dedektifler-3-sosyal-maskara','https://orhantoker.com/img-op/kitap-dijital-dedektifler-3-sosyal-maskara-640.webp']
 };
-const imageHosts=new Set(['orhantoker.com','covers.openlibrary.org','books.google.com','books.googleusercontent.com','lh3.googleusercontent.com']);
+const imageHosts=new Set(['orhantoker.com','www.orhantoker.com','covers.openlibrary.org','books.google.com','books.googleusercontent.com','lh3.googleusercontent.com']);
 function norm(v){return String(v||'').toLocaleLowerCase('tr-TR').replace(/[^a-z0-9\p{L}]+/gu,' ').trim().split(/\s+/).filter(x=>x.length>1)}
 function matches(a,b){const w=norm(a),x=norm(b);return w.length&&x.length&&w.filter(k=>x.includes(k)).length>=Math.max(1,Math.ceil(w.length*.6))}
 function authorMatch(a,b){const w=norm(a),x=norm(Array.isArray(b)?b.join(' '):b);return w.length&&x.length&&w.some(k=>x.includes(k))&&x.some(k=>w.includes(k))}
@@ -38,7 +38,9 @@ async function get(url,image=false){
 async function lookup(b){
  const isbn=checkIsbn(b.isbn);if(!isbn)return {status:'not_found',reason:'ISBN-13 geçersiz veya eksik.'};
  const choices=[],fixed=CURATED[isbn];
- if(fixed&&matches(b.title,fixed[0])&&authorMatch(b.author,fixed[1]))choices.push({url:fixed[3],source:fixed[2],label:'Yazarın resmî kitap sayfası'});
+ if(fixed&&matches(b.title,fixed[0])&&authorMatch(b.author,fixed[1])){
+  try{const data=await get(fixed[3],true);return {status:'verified',data,source:fixed[2],imageUrl:fixed[3],label:'Yazarın resmî kitap sayfası'}}catch(e){}
+ }
  try{
   const record=await get('https://openlibrary.org/isbn/'+isbn+'.json');
   if((record.isbn_13||[]).includes(isbn)&&matches(b.title,record.title)&&record.covers?.length)choices.push({url:'https://covers.openlibrary.org/b/id/'+record.covers[0]+'-L.jpg?default=false',source:'https://openlibrary.org/isbn/'+isbn,label:'Open Library – doğrulanmış ISBN'});
