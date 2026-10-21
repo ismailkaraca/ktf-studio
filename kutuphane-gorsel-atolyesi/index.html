@@ -61,11 +61,21 @@
         <div class="panel-head"><div><small>ADIM 04</small><h2>İndir veya AI ile zenginleştir</h2></div><span class="number-bubble">4</span></div>
         <div class="download-grid"><button class="btn btn-primary" id="downloadPng" type="button">↓ PNG indir (3:4)</button><button class="btn btn-outline" id="printPdf" type="button">▤ PDF / Yazdır</button></div>
         <details class="ai-details"><summary><span>✦</span><strong>ChatGPT ile metin / illüstrasyon üret</strong><span class="arrow">⌄</span></summary>
-          <div class="ai-inside"><p>Künye ve raf numarası sabit kalır. ChatGPT yalnızca paylaşım metni veya yazısız arka plan üretir.</p>
-            <label class="field">Stüdyo erişim kodu<input type="password" id="studioCode" autocomplete="off" placeholder="Yönetici tarafından verilen kod" /></label>
-            <div class="ai-buttons"><button class="btn btn-outline" id="aiCaption" type="button">✦ Paylaşım metni yaz</button><button class="btn btn-outline" id="aiBackground" type="button">✦ İllüstrasyon oluştur</button></div>
-            <p class="small-muted">Bu özelliklerin çalışması için sunucuda OpenAI API anahtarı ve erişim kodu tanımlanmalıdır. ChatGPT aboneliği tek başına API erişimi sağlamaz.</p>
-            <label class="field">Üretilen paylaşım metni<textarea id="caption" rows="4" placeholder="Yapay zekâ metni burada görünecek."></textarea></label><button class="text-button" id="copyCaption" type="button">Metni kopyala</button>
+          <div class="ai-inside">
+            <section class="chatgpt-method" aria-label="Kendi ChatGPT hesabımla devam et">
+              <div class="ai-method-label"><span class="ai-method-icon">✳</span><div><strong>Kendi ChatGPT hesabımla</strong><small>API anahtarı ya da stüdyo kodu gerektirmez</small></div></div>
+              <p>Seçtiğin kitaplar ve tasarım şablonu için isteği biz hazırlıyoruz. ChatGPT hesabının açık olduğu sayfada metin ya da görsel üretebilirsin.</p>
+              <div class="ai-buttons"><button class="btn btn-primary" id="chatgptCaption" type="button">↗ ChatGPT'de metin oluştur</button><button class="btn btn-outline" id="chatgptVisual" type="button">↗ ChatGPT'de görsel oluştur</button></div>
+              <button class="text-button" id="copyChatgptPrompt" type="button">✎ Hazırlanan talimatı kopyala</button>
+              <p class="small-muted">Bu yöntem ChatGPT'yi ayrı sekmede açar ve mesajı önceden doldurur. ChatGPT'de Gönder'e basmalısın; çıkan sonuç bu siteye otomatik aktarılmaz. Kendi hesabında görsel üretme hakkın varsa kullanabilirsin. Bu bir OAuth giriş entegrasyonu değildir.</p>
+            </section>
+            <details class="api-method"><summary>Yönetici API bağlantısıyla doğrudan uygulamada üret</summary>
+              <p>Künye ve raf numarası sabit tutulur. API üzerinden metin veya yazısız arka plan, uygulamanın içinde oluşturulur.</p>
+              <label class="field">Stüdyo erişim kodu<input type="password" id="studioCode" autocomplete="off" placeholder="Yönetici tarafından verilen kod" /></label>
+              <div class="ai-buttons"><button class="btn btn-outline" id="aiCaption" type="button">✦ Paylaşım metni yaz</button><button class="btn btn-outline" id="aiBackground" type="button">✦ İllüstrasyon oluştur</button></div>
+              <p class="small-muted">Bu işlem için sunucuda OPENAI_API_KEY ve STUDIO_ACCESS_CODE tanımlanmalıdır. ChatGPT aboneliği API ücretlerini karşılamaz.</p>
+              <label class="field">Üretilen paylaşım metni<textarea id="caption" rows="4" placeholder="Yapay zekâ metni burada görünecek."></textarea></label><button class="text-button" id="copyCaption" type="button">Metni kopyala</button>
+            </details>
           </div></details>
         <div id="message" class="app-message" role="status" aria-live="polite"></div>
       </main>

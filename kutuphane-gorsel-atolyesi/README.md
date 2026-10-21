@@ -36,3 +36,12 @@ Vercel > Project > Settings > Environment Variables alanından en az şu değerl
 - Üye kişisel verisi AI'a gönderilmez; yalnız seçili kitabın başlık/yazar/yer numarası ve kütüphane adı gönderilir.
 - Dewey ana sınıfları için kullanıcı tarafından bildirilen sabit HEX renkleri kullanılır.
 - Türkçe CSV (`windows-1254`) kodlaması için tarayıcıda geri dönüş çözümleme vardır.
+
+
+## ChatGPT hesabıyla çalışmak (kodsuz yönlendirme)
+
+Ekim 2026 sürümünde kullanıcılar katalogdan kitap ve şablon seçip **ChatGPT'de metin oluştur** veya **ChatGPT'de görsel oluştur** bağlantısını açabilir. Uygulama, kitap adları, yazarlar, ISBN, tam yer numaraları, Dewey HEX renkleri ve kütüphane adını içeren Türkçe istemi kendisi hazırlar. Giriş, ChatGPT'nin kendi sayfasında gerçekleşir. Kullanıcı istemi gözden geçirip **Gönder** düğmesine basar. Yanıt ChatGPT içinde oluşur; Vercel uygulamasına otomatik dönmez. Bu özellik **OpenAI OAuth / Sign in with ChatGPT değildir** ve API anahtarı gerektirmez.
+
+OpenAI açık kaynak ChatGPT plan kullanımı (OAuth) için resmî kılavuz, yerel uygulamaları ve kullanıcı tarafından barındırılan ortamlardaki akışı tanımlar. Merkezi sunucuda çalışan Vercel uygulamalarını bu akışla otomatik yetkilendirilmiş saymaz. Ayrıca açık kaynak plan kullanımında `image_generation` desteklenmediği belgelenmiştir. Bakınız: https://developers.openai.com/siwc/token-sharing-open-source ve https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations.
+
+Sitede doğrudan sonuç almak isteyen yönetici için `/api/generate` üzerinden mevcut server-side API ve erişim kodu yöntemi korunur. Kullanıcının ChatGPT aboneliği bu API'yi finanse etmez. Uygulama, URL'ye yalnızca seçilen katalog künyesini ve kütüphanecinin yazdığı ek notu ekler. Üye bilgisi ya da gizli veri eklemeyin; adres çubuğuna eklenen istem tarayıcı geçmişinde bulunabilir.
