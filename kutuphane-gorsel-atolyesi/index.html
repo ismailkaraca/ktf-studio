@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#192b47" />
+  <meta name="description" content="Kütüphaneler için Koha katalog verileriyle çalışan, prompt gerektirmeyen kitap tanıtım ve Dewey raf yönlendirme tasarım aracı." />
+  <title>Kütüphane Görsel Atölyesi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <div class="brand-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 5.6C9.1 3.8 6.1 3.3 3 4v13.7c3.1-.7 6.1-.2 9 1.6 2.9-1.8 5.9-2.3 9-1.6V4c-3.1-.7-6.1-.2-9 1.6Zm0 0v13.7" stroke="white" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="brand-word"><strong>Kütüphane Görsel Atölyesi</strong><span>Kitapları görünür kıl, okuyucuyu rafa yönlendir</span></div>
+      <div class="head-tags"><span class="tag tag-light">KOHA / CSV / Excel</span><span class="tag tag-soft">Önizleme ücretsiz</span></div>
+    </header>
+
+    <div class="intro">
+      <div><div class="eyebrow">Kütüphaneler için kolay tasarım stüdyosu</div><h1>Bir katalog dosyası. <em>Bir sürü hikâye.</em></h1><p>Kitapları yükle, bir tasarım seç, kütüphane adına özel afişini oluştur. Komut yazmana gerek yok.</p></div>
+      <div class="intro-art" aria-hidden="true"><div class="mini-book" style="--rot:-12deg;--c:#e8aa62">813<br>42</div><div class="mini-book" style="--rot:6deg;--c:#a2d5c2">004<br>TOK</div><div class="mini-book" style="--rot:15deg;--c:#e9bada">📖</div></div>
+    </div>
+
+    <div class="app-grid">
+      <main class="setup-panel">
+        <div class="panel-head"><div><small>ADIM 01</small><h2>Kütüphaneni tanımla</h2></div><span class="number-bubble">1</span></div>
+        <div class="form-grid">
+          <label class="field wide">Kütüphane adı <span class="required">*</span><input id="libraryName" type="text" placeholder="Örn. Ankara Sincan Törekent Halk Kütüphanesi" maxlength="105" value="Ankara Sincan Törekent Halk Kütüphanesi"></label>
+          <label class="field wide">Üst kurum <input id="ministry" type="text" value="T.C. Kültür ve Turizm Bakanlığı" maxlength="100" /></label>
+          <div class="field wide"><span class="field-label">Kütüphane logosu (isteğe bağlı)</span><label class="upload-logo" for="logoInput"><span id="logoLabel">＋ Logo görseli ekle</span><small>PNG / JPG • Yüklemediğinde nötr kitap simgesi kullanılır</small></label><input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp" hidden /></div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="panel-head"><div><small>ADIM 02</small><h2>Kitap listesini yükle</h2></div><span class="number-bubble">2</span></div>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Katalog dosyası yükle">
+          <div class="file-icon">↥</div>
+          <strong>Koha kataloğunu buraya bırak</strong>
+          <span>CSV, noktalı virgüllü CSV, .sxc adlı CSV, XLSX, XLS</span>
+          <button id="browseButton" class="btn btn-ink" type="button">Dosya seç</button>
+          <input id="fileInput" type="file" accept=".csv,.txt,.tsv,.sxc,.xlsx,.xls" hidden />
+        </div>
+        <div class="upload-help"><span class="dot dot-mint"></span><span>Yalnız kitap künyesi, ISBN, yer numarası ve raf konumu kullanılır. Üye verisi gerekli değildir.</span></div>
+        <div class="mini-actions"><button type="button" class="text-button" id="demoButton">✦ Örnek Orhan Toker listesini aç</button><a href="/ornek-katalog.csv" download>Örnek CSV indir ↗</a></div>
+        <div id="dataStatus" class="data-status">Örnek katalog yüklü: 5 farklı eser / 6 nüsha.</div>
+        <div id="books" class="book-picker"></div>
+
+        <div class="section-divider"></div>
+        <div class="panel-head"><div><small>ADIM 03</small><h2>Tasarımını seç</h2></div><span class="number-bubble">3</span></div>
+        <div class="template-grid" id="templates">
+          <button class="template-card selected" data-template="poster" type="button"><span class="template-sample sample-poster"><i>✦</i><b>Kitaplar</b><small>▥ ▥ ▥</small></span><strong>Kitap tanıtım afişi</strong><small>Kapaklar + raf yönlendirme</small></button>
+          <button class="template-card" data-template="comic" type="button"><span class="template-sample sample-comic"><i>💬</i><b>📕 → 📚</b><small>▧ ▧ ▧</small></span><strong>Eğitici çizgi roman</strong><small>4 karede kitap bulma öyküsü</small></button>
+          <button class="template-card" data-template="mindmap" type="button"><span class="template-sample sample-mindmap"><i>↗</i><b>◉</b><small>↙ ↘ ↗</small></span><strong>Zihin haritası</strong><small>Kitap künyesini keşfet</small></button>
+          <button class="template-card" data-template="flashcards" type="button"><span class="template-sample sample-flash"><i>✎</i><b>▣ ▣</b><small>▣ ▣</small></span><strong>Bilgi kartları</strong><small>Paylaşılabilir 4 öğretici bilgi</small></button>
+          <button class="template-card" data-template="shelf" type="button"><span class="template-sample sample-shelf"><i>⌕</i><b>▥▥▥▥</b><small>813.42 → raf</small></span><strong>Rafı bul rehberi</strong><small>Dewey renkleri + yer numarası</small></button>
+        </div>
+        <label class="field wide note-field">Kısa not / kitap hakkında ek bilgi (isteğe bağlı)<textarea id="extraNote" rows="2" placeholder="Yalnızca doğrulanmış kitap özeti ya da tanıtım notu girin."></textarea></label>
+        <div class="section-divider"></div>
+        <div class="panel-head"><div><small>ADIM 04</small><h2>İndir veya AI ile zenginleştir</h2></div><span class="number-bubble">4</span></div>
+        <div class="download-grid"><button class="btn btn-primary" id="downloadPng" type="button">↓ PNG indir (3:4)</button><button class="btn btn-outline" id="printPdf" type="button">▤ PDF / Yazdır</button></div>
+        <details class="ai-details"><summary><span>✦</span><strong>ChatGPT ile metin / illüstrasyon üret</strong><span class="arrow">⌄</span></summary>
+          <div class="ai-inside"><p>Künye ve raf numarası sabit kalır. ChatGPT yalnızca paylaşım metni veya yazısız arka plan üretir.</p>
+            <label class="field">Stüdyo erişim kodu<input type="password" id="studioCode" autocomplete="off" placeholder="Yönetici tarafından verilen kod" /></label>
+            <div class="ai-buttons"><button class="btn btn-outline" id="aiCaption" type="button">✦ Paylaşım metni yaz</button><button class="btn btn-outline" id="aiBackground" type="button">✦ İllüstrasyon oluştur</button></div>
+            <p class="small-muted">Bu özelliklerin çalışması için sunucuda OpenAI API anahtarı ve erişim kodu tanımlanmalıdır. ChatGPT aboneliği tek başına API erişimi sağlamaz.</p>
+            <label class="field">Üretilen paylaşım metni<textarea id="caption" rows="4" placeholder="Yapay zekâ metni burada görünecek."></textarea></label><button class="text-button" id="copyCaption" type="button">Metni kopyala</button>
+          </div></details>
+        <div id="message" class="app-message" role="status" aria-live="polite"></div>
+      </main>
+
+      <aside class="preview-panel">
+        <div class="preview-top"><div><span class="live-dot"></span><strong>Canlı önizleme</strong><small>Seçimlerin anında tasarıma yansır</small></div><span class="ratio-pill">3:4 · 900 × 1200</span></div>
+        <div class="preview-backdrop"><div id="previewStage" class="preview-stage"><div id="poster" class="poster-root"></div></div></div>
+        <div class="preview-foot"><div><span class="check">✓</span> Kitap bilgileri sabit tutulur</div><div><span class="check">✓</span> Dewey renkleri otomatik uygulanır</div></div>
+        <div class="dewey-box"><div class="dewey-heading"><strong>Dewey renk anahtarı</strong><small>Kütüphanenin paylaştığı HEX kodları</small></div><div id="deweyLegend" class="dewey-legend"></div></div>
+      </aside>
+    </div>
+    <footer class="site-footer"><span>Kitap adları ve yer numaraları katalogdan alınır. Yapay zekâ üretimleri yayımlanmadan önce kontrol edilmelidir.</span><span>Kütüphane Görsel Atölyesi · İlk sürüm</span></footer>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>
